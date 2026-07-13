@@ -13,6 +13,22 @@
 % ---- Page geometry: top 3cm / bottom 2cm / left 3cm / right 3cm ------------
 \usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm]{geometry}
 
+% report defaults to \flushbottom, which stretches interline glue to justify
+% the bottom margin; \raggedbottom lets text pages end short instead.
+\raggedbottom
+
+% Separately: when a [t]-placed figure/table doesn't fit on the current page
+% and becomes the sole content of the next one, LaTeX's float-page routine
+% centers it by splitting the leftover space into equal stretchy glue above
+% and below (\@fptop / \@fpbot), regardless of raggedbottom -- that's what
+% pushes a lone figure down into a large blank gap instead of sitting at the
+% top like [t] implies. Making \@fptop non-stretchy and letting \@fpbot
+% absorb all the slack pins lone floats to the top of their page.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+
 % ---- CJK + Latin fonts ------------------------------------------------------
 % See ntust-thesis-format skill's SKILL.md "Known gaps" -- font availability
 % varies by compile environment; swap to the commented alternatives if the

@@ -492,13 +492,17 @@ copy-paste---near-perfect \csim{} with the posture request abandoned
 \end{figure}
 
 \begin{figure}[t]\centering
-\includegraphics[width=\linewidth]{figures/idprompt_noskel.png}
-\caption[FLUX.2 with the identity image and prompt \emph{only} (no skeleton)]{\textbf{FLUX.2 with the identity image and prompt \emph{only} (no
-skeleton).} Each generated cell is annotated with its AdaFace CSIM to the
-reference (green $\geq\!0.25$, red below) and its measured yaw. Without structural
-control the backbone does rotate the head, but renders the prompt's nominal
-person, not the reference---the \emph{wrong} identity (CSIM ${\approx}\,0.13$); the full
-Rotate-ID rotates \emph{and} preserves the reference identity. This is the naive
+\includegraphics[width=0.75\linewidth]{figures/flux2_vs_rotateid_demomatch.png}
+\caption[FLUX.2 vs.\ Rotate-ID on demographic-matched identities]{\textbf{FLUX.2 (identity + prompt, no skeleton) vs.\ Rotate-ID, on
+identities whose prompt demographic already matches the reference} (no
+demographic rewrite involved). Each row reports pose-aware \csim{} ($k{=}4$)
+for FLUX.2 conditioned on the identity image and prompt alone and for the full
+Rotate-ID (\dupid{} $\times 3$ + skeleton + \gate{}), with the gain annotated.
+Without structural control, FLUX.2 already rotates from the prompt but drifts
+toward the prompt's nominal person rather than the reference, costing
+identity; Rotate-ID raises pose-aware \csim{} on every identity shown
+($+0.124$ to $+0.457$). Across the full 35-identity benchmark the same
+comparison averages $0.047\to 0.148$. This is the naive
 baseline (top row of Table~\ref{tab:id_bins}) our components build on.}
 \label{fig:noskel}
 \end{figure}
