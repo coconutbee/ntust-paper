@@ -1,0 +1,263 @@
+% =============================================================================
+% NTUST (國立臺灣科技大學) Master's Thesis
+% Converted from the CVPR-style submission paper at RotateID_overleaf.
+% Implements: 國立臺灣科技大學學位論文撰寫、編排規則及注意事項
+%             (112.03.07 第211次教務會議通過 / 113.12.24 第218次教務會議通過)
+%
+% Compile with XeLaTeX (CJK fonts require it):
+%   xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex
+% =============================================================================
+
+\documentclass[12pt,a4paper]{report}
+
+% ---- Page geometry: top 3cm / bottom 2cm / left 3cm / right 3cm ------------
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm]{geometry}
+
+% ---- CJK + Latin fonts ------------------------------------------------------
+% See ntust-thesis-format skill's SKILL.md "Known gaps" -- font availability
+% varies by compile environment; swap to the commented alternatives if the
+% real 標楷體/Times New Roman fonts are available where this is compiled
+% (Overleaf's font menu typically has both).
+\usepackage{xeCJK}
+\setCJKmainfont{Noto Sans CJK TC}          % <- working default; spec prefers Kaiti/PMingLiU
+% \setCJKmainfont{Kaiti TC}
+% \setCJKmainfont{AR PL KaitiM Big5}
+% \setCJKmainfont{PMingLiU}
+\setmainfont{Liberation Serif}             % <- metrically compatible Times New Roman substitute
+% \setmainfont{Times New Roman}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+
+% ---- 1.5x line spacing (spec: 行距1.5倍行高) --------------------------------
+\usepackage{setspace}
+\onehalfspacing
+
+% ---- Packages carried over from the CVPR source (chapters use these) -------
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{pifont}
+\usepackage{placeins}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage[titles]{tocloft}
+\usepackage{titlesec}
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+% Citation style: kept as the paper's original IEEE style (ieeenat_fullname.bst),
+% NOT mandated by the university -- see SKILL.md if the department/advisor
+% requires a different style (APA/MLA/Chicago/etc).
+% natbib MUST be loaded with [numbers,sort&compress] (as the CVPR source's
+% cvpr.sty does) or \cite silently falls back to natbib's verbose author-year
+% mode -- full author lists like "[Deng et al.(2019)Deng, Guo, Xue, and
+% Zafeiriou]" inline, which do not wrap and run hundreds of points off the
+% page margin.
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{ieeenat_fullname}
+
+% ---- Method-specific macros carried over verbatim from the CVPR source -----
+\newcommand{\todo}[1]{\textcolor{red}{[\textbf{TODO:} #1]}}
+\newcommand{\tbd}{\textcolor{red}{$\ldots$}}
+% NOTE: the CVPR source used \textsc{} for these (small-caps method names).
+% Liberation Serif has no true small-caps glyphs, and XeTeX's NFSS shape
+% substitution for the resulting undefined `sc' shape leaks past its group
+% and corrupts the ambient font shape for the rest of the document (massive
+% overfull \hbox warnings from chapter 1 onward). Use bold instead here.
+\newcommand{\method}{\textbf{Rotate-ID}\xspace}
+\newcommand{\dupid}{\textbf{dup-id}\xspace}
+\newcommand{\csim}{\textbf{csim}\xspace}
+\newcommand{\gate}{$\gamma$-\textbf{gate}\xspace}
+\newcommand{\cmark}{\textcolor{green!55!black}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{red!70!black}{\ding{55}}}
+\newcommand{\pmark}{\textcolor{orange!95!black}{$\circ$}}
+
+% ---- Font sizes per spec ----------------------------------------------------
+% Chapter title 20pt centered; section/subsection headings 18pt left-aligned;
+% body 12pt (documentclass option above).
+\titleformat{\chapter}[display]
+  {\centering\normalfont\fontsize{20pt}{28pt}\selectfont\bfseries}
+  {\chaptertitlename\ \thechapter}{0.5em}{}
+\titleformat{\section}
+  {\raggedright\normalfont\fontsize{18pt}{24pt}\selectfont\bfseries}
+  {\thesection}{0.5em}{}
+\titleformat{\subsection}
+  {\raggedright\normalfont\fontsize{18pt}{24pt}\selectfont\bfseries}
+  {\thesubsection}{0.5em}{}
+
+% Figures/tables are numbered per-chapter automatically by the `report` class.
+
+% ---- Front-matter metadata --------------------------------------------------
+\newcommand{\deptnameZH}{電機工程學系}
+\newcommand{\deptnameEN}{Electrical Engineering}
+\newcommand{\degreeZH}{碩}
+\newcommand{\thesisTitleZH}{具姿態校正效能指標之指定姿勢個人化文字轉圖像生成}
+\newcommand{\thesisTitleEN}{Posture-Requested Personalized Text-to-Image Generation with Pose-Rectified Performance Metrics}
+% *** AUTHOR NAME NOT YET SUPPLIED -- fill in before compiling for real. ***
+\newcommand{\authorNameZH}{[[AUTHOR NAME -- Chinese]]}
+\newcommand{\authorNameEN}{[[AUTHOR NAME -- English]]}
+\newcommand{\advisorNameZH}{鍾聖倫 博士}
+\newcommand{\advisorNameEN}{Sheng-Luen Chung, Ph.D.}
+% Graduation stated as 115/7 (July); spec requires printing JUNE for the
+% summer 7-8 month administrative window regardless of actual defense month.
+\newcommand{\gradYearROC}{115}
+\newcommand{\gradMonthZH}{六}
+\newcommand{\gradYearGregorian}{2026}
+\newcommand{\gradMonthEN}{June}
+
+\begin{document}
+
+% =============================================================================
+% 1. COVER (含書背) + 2. TITLE PAGE
+% =============================================================================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{4cm}
+
+{\fontsize{18pt}{24pt}\selectfont 國立臺灣科技大學\deptnameZH} \\[2pt]
+{\fontsize{18pt}{24pt}\selectfont \degreeZH 士論文} \\[12pt]
+
+{\fontsize{14pt}{18pt}\selectfont Department or Graduate Institute of \deptnameEN} \\[4pt]
+{\fontsize{16pt}{20pt}\selectfont National Taiwan University of Science And Technology} \\
+{\fontsize{16pt}{20pt}\selectfont Master Thesis/Doctoral Dissertation} \\[24pt]
+
+{\fontsize{18pt}{27pt}\selectfont \thesisTitleZH} \\[6pt]
+{\fontsize{18pt}{24pt}\selectfont \thesisTitleEN} \\[24pt]
+
+{\fontsize{18pt}{24pt}\selectfont \authorNameZH} \\[4pt]
+{\fontsize{18pt}{24pt}\selectfont \authorNameEN} \\[24pt]
+
+{\fontsize{18pt}{24pt}\selectfont 指導教授：\advisorNameZH} \\[4pt]
+{\fontsize{18pt}{24pt}\selectfont Advisor: \advisorNameEN} \\[24pt]
+
+{\fontsize{18pt}{24pt}\selectfont 中華民國 \gradYearROC\ 年 \gradMonthZH\ 月} \\
+{\fontsize{18pt}{24pt}\selectfont \gradMonthEN\ \gradYearGregorian}
+
+\vspace*{3cm}
+\end{center}
+\clearpage
+
+% =============================================================================
+% 3-4. RECOMMENDATION FORM + EXAM COMMITTEE FORM
+% *** DO NOT hand-typeset -- obtain from 學生資訊系統 after registering the
+% thesis there; insert the signed PDF pages here (e.g. via \usepackage{pdfpages}
+% and \includepdf[pages=-]{...}). Placeholder pages only below. ***
+% =============================================================================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{4cm}
+\textit{[Insert official 指導教授推薦書 here -- obtain from 學生資訊系統]}
+\end{center}
+\clearpage
+
+\thispagestyle{empty}
+\begin{center}
+\vspace*{4cm}
+\textit{[Insert official 學位考試委員審定書 here -- obtain from 學生資訊系統]}
+\end{center}
+\clearpage
+
+% Front matter uses UPPERCASE Roman-numeral page numbers per spec.
+\pagenumbering{Roman}
+
+% =============================================================================
+% 5. 中文摘要 CHINESE ABSTRACT
+%    Draft direct translation of the English abstract -- please review/polish.
+% =============================================================================
+\chapter*{中文摘要}
+\addcontentsline{toc}{chapter}{中文摘要}
+
+近期身分保真個人化生成方法雖能忠實重現參考人臉，卻普遍偏向正面視角；當使用者要求特定姿態（轉頭、回眸、抬頭或低頭）時，現有方法常崩潰回正面，忽略姿態要求。本論文研究「指定姿勢個人化文字轉圖像生成」：給定單一參考身分影像與姿態指令，生成符合姿態之同一身分影像，並以不偏正面之指標評估。
+
+本論文提出 Rotate-ID，建構於少步驟修正流擴散轉換器（FLUX.2-klein）之單參考影像個人化系統。結構化姿態控制以上下文提供，驅動頭部轉動；透過重新分配骨幹對參考影像之注意力達成身分保真——此機制經因果驗證為身分與姿態共享同一注意力預算，並萃取為約200參數可學習閘門（$\gamma$-gate），於不增姿態代價下精煉身分保真。
+
+人臉辨識器於正面可靠讀出身分，卻隨頭部轉離正面而低估相似度；本論文遂提出「姿態校正效能指標」：以可解釋三維姿態檢測驗證轉動指令、以姿態適配身分讀出器評分，並以姿態感知分數僅於達成姿態時計入身分分數，建立涵蓋8種姿態、40組請求之評測基準。此指標下，Rotate-ID 偏航角準確率(82.6\%)大幅超越最強基準PhotoMaker-V2(36.1\%)，於過肩與大角度轉動下仍為姿態感知身分保真最佳之免調校方法。
+
+\vspace{1em}
+\noindent 關鍵字：個人化文字轉圖像生成、身分保真、頭部姿態控制、擴散轉換器、注意力重新分配、修正流、姿態校正評估
+\clearpage
+
+% =============================================================================
+% 6. ENGLISH ABSTRACT
+% =============================================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+\input{chapters/abstract_content}
+
+\vspace{1em}
+\noindent Keywords: Personalized Text-to-Image Generation, Identity Preservation, Head-Pose Control, Diffusion Transformer, Attention Reallocation, Rectified Flow, Pose-Rectified Evaluation
+\clearpage
+
+% =============================================================================
+% 7. 誌謝 ACKNOWLEDGEMENT (left blank per author's request)
+% =============================================================================
+\chapter*{Acknowledgement}
+\addcontentsline{toc}{chapter}{Acknowledgement}
+\clearpage
+
+% =============================================================================
+% 8. 目錄 TABLE OF CONTENTS
+% =============================================================================
+\tableofcontents
+\clearpage
+
+% =============================================================================
+% 10-11. 圖目錄/表目錄 (thesis has well over 5 figures+tables combined)
+% =============================================================================
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+
+% Main body uses Arabic page numbers starting at Chapter 1.
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% =============================================================================
+% 12. 正文 MAIN BODY
+% =============================================================================
+
+\chapter{Introduction}
+\input{chapters/chap01_introduction}
+
+\chapter{Related Work}
+\input{chapters/chap02_related_work}
+
+\chapter{Pose-Rectified Performance Metrics}
+\input{chapters/chap03_metrics}
+
+\chapter{Method}
+\input{chapters/chap04_method}
+
+\chapter{Why It Works: One Attention Budget}
+\input{chapters/chap05_mechanism}
+
+\chapter{Experiments}
+\input{chapters/chap06_experiments}
+
+\chapter{Limitations}
+\input{chapters/chap07_limitations}
+
+\chapter{Conclusion}
+\input{chapters/chap08_conclusion}
+
+% =============================================================================
+% 13. 參考文獻 REFERENCES
+% =============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{References}
+\bibliography{refs}
+
+% =============================================================================
+% 14. 附錄 APPENDIX
+% =============================================================================
+\appendix
+\chapter{Supplementary Results}
+\input{chapters/appendix_content}
+
+\end{document}

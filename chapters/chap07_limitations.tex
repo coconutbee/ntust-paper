@@ -1,0 +1,40 @@
+\label{sec:limitations}
+Four limitations bound our results.
+
+\section{Pitch and chin-down control}
+\label{sec:lim-pitch}
+The one axis our pipeline cannot fix is chin-down rotation; it is also the axis
+\emph{every} backbone in Table~\ref{tab:backbone} fails, and chin-rotated
+controls recover chin-up but not chin-down. We treat it as a learned prior of
+the distilled backbone rather than a deficiency of the method.
+
+\section{Scale and backbone constraints}
+\label{sec:lim-scale}
+Our learned allocator works because it acts
+inside the existing attention budget; attempts to train a fresh, higher-capacity
+identity pathway did not generalize at our identity count, leaving open whether
+that is a data-scale or a distillation effect (the few-step backbone runs
+off-distribution under heavy conditioning).
+
+\section{The one-shot ceiling}
+\label{sec:lim-oneshot}
+A single frontal reference fundamentally under-determines the far side of a profile
+face; a small fraction of identities are simply hard for the backbone to render
+regardless of conditioning, bounding achievable fidelity.
+
+\section{The pose--identity trade-off is fundamental, not fully solved}
+\label{sec:lim-tradeoff}
+Instruction \emph{image-editing} models are an appealing alternative---they edit
+the reference face directly rather than re-synthesizing it---yet they inherit the
+\emph{same} tension we study: Step1X-Edit~\cite{step1xedit} preserves identity but
+barely rotates ($11.4\%$ yaw), whereas OmniGen2~\cite{omnigen2} rotates
+substantially ($44.4\%$ yaw) but at a markedly lower identity ($0.308$ AdaFace),
+trading one objective for the other rather than achieving both. This indicates the
+trade-off is not an artifact of identity \emph{adapters} but a general property of
+driving a frozen generator toward off-distribution pose. Our $\gamma$-gate is, to
+our knowledge, the only mechanism evaluated here that improves identity \emph{at no
+pose cost}, but it does not eliminate the trade-off---identity at profile still
+falls below frontal reconstruction (Sec.~\ref{sec:lim-oneshot})---and a method that
+combines direct pixel editing with attention-budget reallocation may push the
+frontier further than either alone.
+

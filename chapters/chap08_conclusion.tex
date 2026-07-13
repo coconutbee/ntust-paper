@@ -1,0 +1,27 @@
+\label{sec:conclusion}
+We studied \emph{posture-requested} personalized text-to-image generation---a
+single reference identity, an explicit textual posture request, and
+accountability for realizing both---a regime where adapter-based personalizers,
+bound by their backbone's pose prior, either fail to rotate or lose identity. We first verified causally that FLUX.2-klein's frozen VAE and joint attention
+actually carry and use identity content---not merely occupy a sequence
+slot---establishing its in-context conditioning as a valid, if unintentional,
+identity substrate. On
+FLUX.2-klein we combined an in-context sam3d-skeleton control with reference
+duplication to attain strong rotation while recovering identity. We then gave a
+mechanistic account grounded in the backbone's own token geometry---references
+enter the joint attention as positionally-ordered key/value blocks, so identity
+and pose compete for one softmax-normalized attention budget---and confirmed it
+causally by attention surgery, turning a collection of training-free heuristics
+(duplication, ordering) into a single principle. That principle yielded a
+$\sim$200-parameter learned attention-budget allocator that \emph{refines}
+identity further---the first trained component to improve over the strongest
+training-free configuration at no pose cost. The second half of the contribution
+is measurement: our \emph{pose-rectified performance metrics}---an explainable
+pose check that verifies whether the requested posture was realized, a
+pose-adapted identity read-out (PAEs), and a pose-aware identity that credits the
+face cosine only at the posture actually produced---both expose the profile-view
+identity loss central to the task and prevent frontal collapse from masquerading
+as identity preservation. Future work includes scaling the learned allocator to
+many more identities via a self-distilled data engine, testing it on a
+non-distilled backbone, and closing the chin-down pitch axis with pose-targeted
+data or 3D-aware control.

@@ -1,0 +1,73 @@
+\label{sec:related}
+
+% --- substrate opening (kept from the former DiT-backbones subsection) ---
+Latent diffusion models brought high-quality text-to-image (T2I) synthesis, and the move from U-Net to \emph{diffusion transformers} (DiT)~\cite{dit,sd3} with rectified-flow training~\cite{rectifiedflow,flowmatching} sharply improved prompt alignment and sample quality, as in FLUX~\cite{flux}. A defining property of DiTs is that conditioning is performed \emph{in context}: a reference or control image is encoded to latent tokens and \emph{concatenated} into the same attention sequence as the generated image, dispensing with a side branch and letting a single joint attention mix all signals~\cite{ominicontrol,fluxkontext}. This in-context substrate is what we build on. Yet text alone pins neither a specific identity nor a precise head pose---the two axes this paper must control jointly. We call this setting \emph{posture-requested} generation: the prompt names a target posture (turn direction, over-the-shoulder, chin), and whether it was realized is \emph{measured}, not assumed. The literature below leaves both halves open: personalization methods treat the requested posture as a soft suggestion, and existing evaluations read identity with frontal-biased recognizers that cannot judge the hard poses.
+
+\section{Personalized text-to-image generation}
+\emph{Test-time fine-tuning} adapts a backbone to a specific subject by optimizing weights or tokens per subject: DreamBooth~\cite{dreambooth} fine-tunes the model, Textual Inversion~\cite{textinv} learns a pseudo-word, and LoRA~\cite{lora} inserts low-rank weights. These reach high fidelity but require minutes-to-hours of per-subject optimization and several reference images, and the achievable head pose remains whatever the \emph{frozen} backbone happens to render for the prompt---they add no explicit control over out-of-plane rotation.
+
+\emph{Tuning-free} methods instead inject identity through a trained module without per-subject optimization, differing mainly in \emph{how} identity is injected: IP-Adapter~\cite{ipadapter} adds a decoupled cross-attention for an image prompt; PhotoMaker~\cite{photomaker} stacks ID embeddings; InstantID~\cite{instantid} couples a face embedding with a keypoint branch; PuLID~\cite{pulid} uses alignment losses that minimize disruption of the base model; UniPortrait~\cite{uniportrait} adds decoupled routing for multiple identities; and MasterWeaver~\cite{masterweaver} targets editability-aware training. Recent systems move to flow-matching or in-context FLUX backbones---UNO~\cite{uno}, InfiniteYou~\cite{infiniteyou}, WithAnyone~\cite{withanyone}, and DreamO~\cite{dreamo}; DreamO even conditions \emph{in context}, the same substrate we build on. Yet none offers explicit control over out-of-plane head pose. WithAnyone~\cite{withanyone} further reports a \emph{copy-paste} artifact---over-fitting to the reference suppresses prompted pose variation---a symptom of the very tension we study. In practice, these methods hold identity only within the backbone's comfortable, near-frontal pose distribution~\cite{beyondfacial}; at large yaw, identity collapses back toward a frontal face. Closing this gap is the central goal of our work.
+
+\section{Structural control and instruction-based editing}
+A separate line steers \emph{structure} rather than identity. ControlNet~\cite{controlnet} clones the encoder into a trainable side branch fed a depth/pose/edge map, and T2I-Adapter~\cite{t2iadapter} is a lighter variant; on DiTs, in-context controllers instead fold the condition into the attention sequence---OminiControl~\cite{ominicontrol} reuses the DiT's own weights on concatenated control tokens, and EasyControl~\cite{easycontrol} makes this efficient. These deliver structure faithfully but carry \emph{no} identity, and cannot personalize a face on their own; in-context control is the natural substrate for our pose control, yet placing a structural control and an identity reference in one attention sequence makes the two \emph{compete} for attention---exactly the pose--identity conflict this paper resolves.
+
+A second line edits an \emph{existing} image from a text instruction instead of generating from scratch. InstructPix2Pix~\cite{instructpix2pix} trains an instruction-conditioned diffusion editor on synthetic edit pairs, and recent large editors push instruction-following and content preservation much further: Qwen-Image-Edit-2511~\cite{qwenimageedit}, Step1X-Edit~\cite{step1xedit}, and the unified generator-editor OmniGen2~\cite{omnigen2} perform strong attribute, scene, and style edits while faithfully preserving the rest of the input. Because they edit the given face directly, identity is well retained---but applied to head rotation they tend to keep the input's near-frontal pose: among the two we run at full benchmark scale (Sec.~\ref{sec:exp}; Qwen-Image-Edit-2511 is compared separately on resource cost, App.~\ref{sec:appendix_backbone}, since it does not fit the same GPU un-quantized), the strongest realizes the requested out-of-plane turn in only a small fraction of cases, leaving the head essentially frontal. Structural control and instruction editing therefore each solve one half of the problem---faithful structure or faithful identity---but neither delivers large identity-preserving head rotation on its own, the same gap left open by the personalization methods above.
+
+\section{Pose-robust recognition and metric reliability}
+Reading identity at large pose is hard even for face recognizers, which makes
+evaluation a first-class concern for this task. ArcFace~\cite{arcface} and
+AdaFace~\cite{adaface} are trained on predominantly near-frontal data, and
+their confidence drops as the face turns: on the CFP benchmark, verifiers lose
+roughly ten points from frontal--frontal to frontal--profile pairs while humans
+barely drop~\cite{cfp}. PASL~\cite{pasl} responds by training pose-adapted
+encoders per yaw bin. We draw the \emph{measurement} lesson: a frontal-encoder
+cosine mixes a real identity loss with the encoder's own blind spot, so
+identity must be read \emph{at the pose actually produced}---our evaluation
+suite (Sec.~\ref{sec:metrics}) adopts pose-adapted encoders in exactly this
+spirit. Related concerns motivate
+\emph{rectified} metrics elsewhere (AgeTransGAN~\cite{agetransgan} for
+cross-age verification), and the prevailing CLIP score~\cite{clipscore} cannot
+even say \emph{whether} the head turned. No prior personalization work pairs
+posture-requested generation with an evaluation that is both robust across pose
+and verifies posture realization---the two gaps that \textbf{Rotate-ID} and
+our \emph{pose-rectified performance metrics} fill.
+
+\paragraph{Relation to the closest methods.} Rotate-ID is closest to the
+\emph{in-context, multi-reference} conditioners UNO~\cite{uno},
+DreamO~\cite{dreamo}, and OmniGen2~\cite{omnigen2}, which also concatenate
+reference blocks into one joint-attention sequence. Two things set it apart:
+a \emph{measurement-selected structural pose control}, and the learned
+\gate{}. Note that \dupid{} repeats the \emph{same single} reference---an
+attention-budget mechanism, not extra photos---so Rotate-ID remains
+\emph{one-shot}. We benchmark against all three directly (Sec.~\ref{sec:exp});
+Table~\ref{tab:capability} summarizes the landscape: only Rotate-ID offers
+every capability the task needs at once.
+
+\begin{table}[t]\centering\footnotesize
+\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.18}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{ll ccccc}
+\toprule
+Method & Type & \shortstack{One-\\shot} & \shortstack{Tuning-\\free} & \shortstack{Pose\\control} & \shortstack{Profile\\rotation} & \shortstack{ID @\\profile} \\
+\midrule
+DreamBooth~\cite{dreambooth}    & fine-tune & \cmark & \xmark & \xmark & \cmark & \pmark \\
+IP-Adapter~\cite{ipadapter}     & adapter   & \cmark & \cmark & \xmark & \xmark & \xmark \\
+UNO$^{\ast}$~\cite{uno}         & adapter   & \cmark & \cmark & \xmark & \xmark & \xmark \\
+InstantID~\cite{instantid}      & encoder   & \cmark & \cmark & \xmark & \xmark & \xmark \\
+PhotoMaker-V2~\cite{photomaker} & encoder   & \cmark & \cmark & \pmark & \pmark & \xmark \\
+DreamO$^{\ast}$~\cite{dreamo}   & encoder   & \cmark & \cmark & \pmark & \pmark & \xmark \\
+OmniGen2$^{\ast}$~\cite{omnigen2}& editing  & \cmark & \cmark & \pmark & \pmark & \xmark \\
+\midrule
+\textbf{Rotate-ID (ours)}       & ---       & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\bottomrule
+\end{tabular}}
+\caption[Capability comparison for one-shot identity-preserving face rotation]{\textbf{Capability comparison for one-shot identity-preserving face
+rotation} (one representative per method type plus the closest in-context
+methods). \cmark~supported, \pmark~partial/unreliable, \xmark~absent.
+\emph{Pose control}: an explicit, controllable head-rotation input rather than
+relying on the prompt; \emph{Profile rotation}: reliably reaches large yaw;
+\emph{ID @ profile}: holds identity at those angles. Only \textbf{Rotate-ID}
+satisfies all five. $^{\ast}$in-context, multi-reference methods---the baselines
+closest to ours in mechanism.}
+\label{tab:capability}
+\end{table}
