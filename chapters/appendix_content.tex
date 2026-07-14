@@ -1,13 +1,27 @@
 \label{sec:appendix}
 
+This appendix collects everything the main chapters summarize but do not have
+room to show in full, in three groups. A.1--A.3 stress-test the evaluation
+protocol itself---whether the pose-rectified ranking survives under a closer
+look at which methods actually rotate (A.1), an alternative metric weighting
+(A.2), and a fairer pose-control format for the ControlNet baselines (A.3).
+A.4 justifies the backbone choice every other chapter assumes. A.5--A.6
+supply the full causal and quantitative data behind Chapter 5's mechanistic
+account of \emph{why} identity survives and \emph{why} reference order
+matters. A.7--A.8 are reference material---the exact angle formulas and
+identity-encoder definitions the main chapters cite by name but do not spell
+out.
+
 \section{Per-method pose distributions}
 \label{sec:appendix_thresh}
-The pose-angle definitions (head yaw, pitch, body yaw, and the head-to-torso yaw
+We start with the evaluation protocol's most basic question: which methods
+actually cross the turn and over-the-shoulder boundaries, as opposed to only
+claiming to? The pose-angle definitions (head yaw, pitch, body yaw, and the head-to-torso yaw
 $\Delta\theta_y$), the category thresholds, and their data-driven design are given
 in the main text (Sec.~\ref{sec:metrics}); the prompt benchmark's balance across
-all eight pose cells is Table~\ref{tab:prompts}. Here we report the per-method
-head-yaw, pitch, and $\Delta\theta_y$ histograms (Fig.~\ref{fig:methoddist}),
-showing which methods actually cross the turn and over-the-shoulder boundaries.
+all eight pose cells is Table~\ref{tab:prompts}. Here we report the full
+per-method head-yaw, pitch, and $\Delta\theta_y$ histograms
+(Fig.~\ref{fig:methoddist}) behind that question.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{figures/eval_fig2_method_dist.png}
@@ -22,7 +36,9 @@ $\pm15^\circ$.}
 
 \section{Robustness of the pose-aware ranking to the yaw/pitch weighting}
 \label{sec:appendix_pe}
-Our pose-aware identity (Sec.~\ref{sec:metrics}) penalizes by yaw alone,
+A.1 established which methods actually rotate; we now check that this is not
+an artifact of how the identity metric itself is weighted. Our pose-aware
+identity (Sec.~\ref{sec:metrics}) penalizes by yaw alone,
 $P_e{=}1{-}\mathrm{Acc_{yaw}}$, because yaw is the axis our task is defined on. To
 confirm the resulting ranking is \emph{not} an artifact of that choice, we
 re-evaluate it under the general weighting
@@ -75,8 +91,12 @@ DreamBooth$^\dagger$.}
 
 \section{Pose control across backbones: native vs.\ foreign skeleton format}
 \label{sec:exp_skel}
-A natural question is whether the rotation is merely the backbone: would any
-model, given a pose control \emph{in the format it expects}, rotate as well?
+A.2 confirmed the identity metric's own design is not deciding the ranking;
+we turn now to a different confound in the \emph{comparison} itself. Every
+ControlNet baseline in the main results was fed our SAM-3D skeleton, which is
+foreign to their own training format---so a natural question is whether the
+rotation gap is merely an artifact of that mismatch: would any model, given a
+pose control \emph{in the format it expects}, rotate as well?
 Table~\ref{tab:skel} conditions several backbones on a skeleton of the
 \emph{same} pose (derived from one shared source render). Two findings. First,
 the control \emph{format} matters enormously: a ControlNet fed a foreign SAM-3D
@@ -148,6 +168,12 @@ Table~\ref{tab:skel}) is the one promoted to the main results.}
 
 \section{Backbone choice: rotation quality and resource efficiency}
 \label{sec:appendix_backbone}
+A.3 showed that even a favorably-formatted external ControlNet still trails
+Rotate-ID's in-context conditioning---so the comparison is fair, but it begs a
+different question: why condition FLUX.2-klein specifically, rather than any
+other backbone? This section justifies that choice on both axes that matter:
+rotation quality and the compute budget the rest of the thesis depends on.
+
 \paragraph{Text-driven rotation across T2I backbones.}
 Before adding any structural control, we compare six T2I backbones at text-driven
 head rotation on the balanced 40-prompt benchmark (Sec.~\ref{sec:exp_setup}),
@@ -231,12 +257,14 @@ training; the editors' s/img is from Table~\ref{tab:sota_pose}.}
 
 \section{Verifying the reference-conditioning pathway: full data}
 \label{sec:appendix_causal}
-Sec.~\ref{sec:refverify} argued causally that identity survives FLUX.2-klein's
-in-context conditioning through three verified links: the VAE preserves
-identity-relevant detail, the raw pre-attention reference tokens do not yet
-encode it legibly, and the transformer's joint attention reads it from the
-reference's \emph{content} rather than its sequence position. We give the
-complete data for each here.
+With FLUX.2-klein justified as the base, we turn from practical constraints to
+a mechanistic one: does identity actually survive its frozen VAE and joint
+attention, or could the causal story of Sec.~\ref{sec:refverify}'s three
+verified links (the VAE preserves identity-relevant detail; the raw
+pre-attention reference tokens do not yet encode it legibly; the joint
+attention reads it from the reference's \emph{content}, not its sequence
+position) be an artifact of how those experiments were scored? This section
+gives the complete data behind each link.
 
 \paragraph{(i) VAE round-trip.} We encode-then-decode $34$ reference identities
 through the frozen VAE alone (no denoising, no transformer) and score AdaFace
@@ -366,7 +394,14 @@ the reference actually used).}
 
 \section{Reference order: the earlier block wins the budget}
 \label{sec:appendix_ordering}
-Sec.~\ref{sec:refgeometry} predicts that \emph{order} is a real variable: the
+A.5 showed identity tracks the reference's \emph{content}, not the identity
+slot's position in the sequence---so it is natural to ask whether \emph{list
+order} (which block comes first) should matter at all. It does, but not by
+contradicting A.5: order does not change \emph{which} content the model reads,
+only \emph{how much} attention that content receives, because the joint
+attention's RoPE coordinates are order-dependent even though its content
+read-out is not. Sec.~\ref{sec:refgeometry} predicts that \emph{order} is a
+real variable on exactly this basis: the
 first-listed reference sits closest to the generation on the RoPE $t$-axis
 (Eq.~\ref{eq:ropeids}) and should receive more attention. We verify this at
 generation scale with a controlled swap---identical prompts, seed, duplication,
@@ -396,7 +431,11 @@ $t$-coordinate geometry (Eq.~\ref{eq:ropeids}) predicts.}
 
 \section{Pose-angle extraction: exact formulas}
 \label{sec:appendix_angles}
-This section gives the full geometry summarized in Sec.~\ref{sec:metrics}.
+A.1--A.6 verified the evaluation protocol and the method's causal mechanism;
+the remaining two sections are reference material the earlier chapters cite
+by name without room to spell out. We start with the geometry behind every
+yaw/pitch/over-the-shoulder number reported so far: this section gives the
+full formulas summarized in Sec.~\ref{sec:metrics}.
 \emph{Head yaw} $\theta_y$ and \emph{head pitch} $\theta_p$ come from the head's
 global rotation $R_{\mathrm{head}}$, formed by composing the SMPL-X forward
 kinematics along the spine chain
@@ -422,6 +461,9 @@ far relative to the chest.
 
 \section{Reading identity at profile: the full evidence}
 \label{sec:appendix_profile}
+A.7 gave the formulas behind every \emph{pose} number in this thesis; this
+closing section documents the encoder behind every \emph{identity} number,
+and gathers the full evidence that its profile read-out is trustworthy.
 
 \paragraph{What the PAEs are.} \textbf{Pose-Adapted face Encoders (PAEs)} are a
 bank of six pose-specialized recognizers

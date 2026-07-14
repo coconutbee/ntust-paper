@@ -1,27 +1,35 @@
 \label{sec:conclusion}
-We studied \emph{posture-requested} personalized text-to-image generation---a
-single reference identity, an explicit textual posture request, and
-accountability for realizing both---a regime where adapter-based personalizers,
-bound by their backbone's pose prior, either fail to rotate or lose identity. We first verified causally that FLUX.2-klein's frozen VAE and joint attention
-actually carry and use identity content---not merely occupy a sequence
-slot---establishing its in-context conditioning as a valid, if unintentional,
-identity substrate. On
-FLUX.2-klein we combined an in-context sam3d-skeleton control with reference
-duplication to attain strong rotation while recovering identity. We then gave a
-mechanistic account grounded in the backbone's own token geometry---references
-enter the joint attention as positionally-ordered key/value blocks, so identity
-and pose compete for one softmax-normalized attention budget---and confirmed it
-causally by attention surgery, turning a collection of training-free heuristics
-(duplication, ordering) into a single principle. That principle yielded a
-$\sim$200-parameter learned attention-budget allocator that \emph{refines}
-identity further---the first trained component to improve over the strongest
-training-free configuration at no pose cost. The second half of the contribution
-is measurement: our \emph{pose-rectified performance metrics}---an explainable
-pose check that verifies whether the requested posture was realized, a
-pose-adapted identity read-out (PAEs), and a pose-aware identity that credits the
-face cosine only at the posture actually produced---both expose the profile-view
-identity loss central to the task and prevent frontal collapse from masquerading
-as identity preservation. Future work includes scaling the learned allocator to
-many more identities via a self-distilled data engine, testing it on a
-non-distilled backbone, and closing the chin-down pitch axis with pose-targeted
-data or 3D-aware control.
+We set out to study \emph{posture-requested} personalized text-to-image
+generation---a single reference identity, an explicit textual posture
+request, and accountability for realizing both---a regime where adapter-based
+personalizers, bound by their backbone's pose prior, either fail to rotate or
+lose identity. The thesis's central finding is that this failure is not a
+missing capability but a \emph{resource allocation} problem: FLUX.2-klein's
+frozen VAE and joint attention already carry and use identity content
+(Sec.~\ref{sec:refverify}), but identity and pose are forced to compete for
+one shared, softmax-normalized attention budget (Sec.~\ref{sec:mechanism}),
+and every training-free heuristic that improves identity---reference
+duplication, block ordering---turns out to be the same operation on that
+budget in disguise. Every other contribution follows from treating this as
+the object to engineer, not work around. On the \emph{method} side, an
+in-context SAM-3D skeleton control supplies the rotation, and because
+duplication and ordering are coarse, discrete ways of re-weighting the
+budget, we distilled them into a $\sim$200-parameter learned attention-budget
+allocator that refines identity further---the first trained component in
+this line of work to improve over the strongest training-free configuration
+at no pose cost. On the \emph{measurement} side, the same insight motivated
+asking whether an aggregate identity score can be trusted at all once pose
+varies: our \emph{pose-rectified performance metrics}---an explainable pose
+check, a pose-adapted identity read-out (PAEs), and a pose-aware identity
+that credits the face cosine only at the posture actually produced---expose
+the profile-view identity loss the task is defined by and prevent frontal
+collapse from masquerading as identity preservation. Method and metric are
+thus two views of one finding: once identity is read at the pose actually
+produced, and once the backbone's attention budget is allocated rather than
+left to a fixed heuristic, posture-requested personalization stops being a
+trade-off and becomes a controllable point on one. Future work includes
+scaling the learned allocator to many more identities via a self-distilled
+data engine, testing it on a non-distilled backbone, and closing the
+chin-down pitch axis with pose-targeted data or 3D-aware control---each a
+natural next step once the attention budget, rather than the symptom, is the
+thing being engineered.

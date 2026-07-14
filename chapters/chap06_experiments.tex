@@ -203,23 +203,26 @@ App.~\ref{sec:appendix_thresh}.}
 \FloatBarrier
 \section{Identity under pose}
 \label{sec:exp_id}
-The pose-aware reading (Table~\ref{tab:posepenalized}) already shows that, once
-pose is accounted for, Rotate-ID's identity overtakes the frontal-collapsing
-baselines. Two observations explain why. First, the pose-robust \emph{PAEs} score
-is consistently higher than overall AdaFace (Rotate-ID $0.377$ vs.\ $0.297$;
-Table~\ref{tab:sota_pose}), confirming that much of the apparent profile identity
-loss is a \emph{recognition-metric artifact}---the angle-matched expert still finds
-the identity, and a \emph{single} cross-pose encoder ($E_{fs}$ or $E_{fp}$) applied
-to all images matches the routed PAEs to within $\sim\!0.04$, so the recovered
-identity reflects the pose-adapted encoders, not the bin-selection rule. Second,
-Rotate-ID builds this identity from the bare backbone with no prompt edit:
-Table~\ref{tab:id_bins} isolates the contribution of each component, and we
-return to it as the formal component ablation in Sec.~\ref{sec:exp_ablate}.
+Sec.~\ref{sec:exp_setup} showed Rotate-ID rotates most reliably and flagged the
+baselines' raw identity lead as a frontal-bias artifact; this section asks how
+much of that gap is the \emph{recognizer's} bias specifically, and how much is
+identity Rotate-ID itself has to earn. Two observations, one per question.
+First, the pose-robust \emph{PAEs} score is consistently higher than overall
+AdaFace (Rotate-ID $0.377$ vs.\ $0.297$; Table~\ref{tab:sota_pose}): the
+angle-matched expert still finds the identity, and a \emph{single} cross-pose
+encoder ($E_{fs}$ or $E_{fp}$) applied to all images matches the routed PAEs
+to within $\sim\!0.04$, so this recovery reflects the pose-adapted encoders
+themselves, not the bin-selection rule---confirming the recognizer-artifact
+reading is real, not a metric-design coincidence. Second, independent of which
+encoder reads it, Rotate-ID builds this identity from the bare backbone with
+no prompt edit: Table~\ref{tab:id_bins} isolates the contribution of each
+component, and we return to it as the formal component ablation in
+Sec.~\ref{sec:exp_ablate}.
 
-\noindent\textbf{Takeaway.} \emph{Much of the profile identity drop is the
-recognizer's artifact (PAEs $>$ AdaFace everywhere); the learned gate recovers
-the rest purely by reallocating attention to the reference, with no prompt
-edit.}
+\noindent\textbf{Takeaway.} \emph{The recognizer-artifact reading holds up
+under independent pose-adapted encoders, not just PAEs' own bin rule---and the
+identity Rotate-ID recovers on top of that is earned with no prompt edit,
+purely by reallocating attention to the reference.}
 
 \begin{table}[t]\centering\small
 \setlength{\tabcolsep}{5pt}
@@ -250,14 +253,17 @@ the pose-aware discount.}
 \FloatBarrier
 \section{Pose-aware identity: sweeping the penalty $k$}
 \label{sec:exp_penalized}
-The baselines earn their high aggregate identity on near-frontal outputs
-(Table~\ref{tab:sota_pose}). To summarize the identity--rotation trade-off in a
-\emph{single} number we use the \emph{pose-aware identity}
-$\widetilde{\mathrm{CSIM}}(k)=\mathrm{CSIM}\cdot e^{-k P_e}$ (Sec.~\ref{sec:metrics},
-Eq.~\ref{eq:posepenalty}): it discounts each method's mean AdaFace (or PAEs)
+Secs.~\ref{sec:exp_setup}--\ref{sec:exp_id} established \emph{that} the
+baselines' identity lead is a frontal-bias artifact; this section turns that
+qualitative reading into a single tunable number, so the claim does not rest
+on one arbitrarily-chosen discount strength. Recall from Sec.~\ref{sec:metrics}
+the \emph{pose-aware identity}
+$\widetilde{\mathrm{CSIM}}(k)=\mathrm{CSIM}\cdot e^{-k P_e}$
+(Eq.~\ref{eq:posepenalty}): it discounts each method's mean AdaFace (or PAEs)
 \csim{} by its yaw error $P_e{=}1-\mathrm{Acc_{yaw}}$, with $k{=}0$ the raw mean and
-larger $k$ punishing unrealized rotation more---the formula form of our central
-claim, \emph{identity only counts at the pose actually requested}.
+larger $k$ punishing unrealized rotation more. We now sweep $k$ itself, rather
+than fixing it, to check the ranking is not an artifact of the $k{=}4$ chosen
+elsewhere in this chapter.
 
 Table~\ref{tab:posepenalized} reports the raw means and the pose-aware identity at
 $k{=}4$; Fig.~\ref{fig:posepenalized} sweeps $k$. At $k{=}0$ (raw) the
@@ -335,10 +341,13 @@ rotating less, is overtaken as well.}
 \FloatBarrier
 \section{Ablation: the identity--pose trade-off}
 \label{sec:exp_ablate}
-This section ablates every mechanism-level design decision of
-Secs.~\ref{sec:refgeometry}--\ref{sec:learned}: the presence of each component,
-the duplication \emph{count}, the reference \emph{order}, and the learned gate,
-each scored with the pose-rectified metrics of Sec.~\ref{sec:metrics}.
+Sec.~\ref{sec:exp_penalized} established \emph{that} Rotate-ID is the strongest
+pose-aware method at every reasonable $k$; this section asks \emph{which part}
+of the method earns that result. We ablate every mechanism-level design
+decision of Secs.~\ref{sec:refgeometry}--\ref{sec:learned}: the presence of
+each component, the duplication \emph{count}, the reference \emph{order}, and
+the learned gate, each scored with the pose-rectified metrics of
+Sec.~\ref{sec:metrics}.
 
 \paragraph{Component ablation.}
 Table~\ref{tab:id_bins} doubles as our identity ablation. Conditioning FLUX.2 on
@@ -359,6 +368,22 @@ $0.079\!\rightarrow\!0.183\!\rightarrow\!0.188$ PAEs), so each component adds
 identity \emph{without} giving up rotation---a controllable point on the
 identity--pose Pareto. Figure~\ref{fig:teaser} shows the rotation-with-identity
 result qualitatively.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.75\linewidth]{figures/flux2_vs_rotateid_demomatch.png}
+\caption[FLUX.2 vs.\ Rotate-ID on demographic-matched identities]{\textbf{FLUX.2 (identity + prompt, no skeleton) vs.\ Rotate-ID, on
+identities whose prompt demographic already matches the reference} (no
+demographic rewrite involved). Each row reports pose-aware \csim{} ($k{=}4$)
+for FLUX.2 conditioned on the identity image and prompt alone and for the full
+Rotate-ID (\dupid{} $\times 3$ + skeleton + \gate{}), with the gain annotated.
+Without structural control, FLUX.2 already rotates from the prompt but drifts
+toward the prompt's nominal person rather than the reference, costing
+identity; Rotate-ID raises pose-aware \csim{} on every identity shown
+($+0.124$ to $+0.457$). Across the full 35-identity benchmark the same
+comparison averages $0.047\to 0.148$. This is the naive
+baseline (top row of Table~\ref{tab:id_bins}) our components build on.}
+\label{fig:noskel}
+\end{figure}
 
 \paragraph{Duplication count: identity saturates, pose pays.}
 How far can duplication alone be pushed? We sweep $N\in\{1,2,3,4,5,6\}$ identity
@@ -479,30 +504,15 @@ rotation; duplication only trades along the identity--pose curve, and the
 $\sim$200-parameter \gate{} is the only setting that moves above it.}
 
 \begin{figure}[t]\centering
-\includegraphics[width=\textwidth]{figures/mech_visual_settings_progression.png}
-\caption[Every setting, one prompt and seed]{\textbf{Every setting, one prompt and seed} (full frames; AdaFace \csim{}
-and pose verdict under each image)---the multi-identity view of
-Fig.~\ref{fig:idemergence}, pushed on a single case through the full
-duplication range to the copy-paste endpoint. A single reference loses the identity
-entirely (wrong person); duplication recovers it by $N{=}3$; the \gate{} (green
-frame) refines it further; and over-duplication ($N{\ge}8$) collapses into
+\includegraphics[width=\textwidth]{figures/mech_visual_settings_progression_single.png}
+\caption[Every setting, one prompt and seed, to the copy-paste endpoint]{\textbf{Every setting, one prompt and seed, to the copy-paste endpoint}
+(full frames; AdaFace \csim{} and pose verdict under each image)---the
+\emph{Malala} row of Fig.~\ref{fig:idemergence}, extended past $N{=}6$ to the
+two duplication counts that chapter stopped short of. The $N{\le}6$ cells
+repeat what Fig.~\ref{fig:idemergence} already showed (identity lost at
+$N{=}1$, recovered by $N{=}3$, refined by the \gate{}); the new information is
+what happens if duplication is pushed further: $N{\ge}8$ collapses into
 copy-paste---near-perfect \csim{} with the posture request abandoned
 (\emph{pose}~\xmark).}
 \label{fig:visualprogress}
-\end{figure}
-
-\begin{figure}[t]\centering
-\includegraphics[width=0.75\linewidth]{figures/flux2_vs_rotateid_demomatch.png}
-\caption[FLUX.2 vs.\ Rotate-ID on demographic-matched identities]{\textbf{FLUX.2 (identity + prompt, no skeleton) vs.\ Rotate-ID, on
-identities whose prompt demographic already matches the reference} (no
-demographic rewrite involved). Each row reports pose-aware \csim{} ($k{=}4$)
-for FLUX.2 conditioned on the identity image and prompt alone and for the full
-Rotate-ID (\dupid{} $\times 3$ + skeleton + \gate{}), with the gain annotated.
-Without structural control, FLUX.2 already rotates from the prompt but drifts
-toward the prompt's nominal person rather than the reference, costing
-identity; Rotate-ID raises pose-aware \csim{} on every identity shown
-($+0.124$ to $+0.457$). Across the full 35-identity benchmark the same
-comparison averages $0.047\to 0.148$. This is the naive
-baseline (top row of Table~\ref{tab:id_bins}) our components build on.}
-\label{fig:noskel}
 \end{figure}

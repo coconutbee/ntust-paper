@@ -326,3 +326,15 @@ $+\,\lambda\,\overline{(\log\gamma)^2}$; the gradient updates \emph{only}
 $\log\gamma$ (the identity channel). The backbone is frozen throughout.}
 \label{fig:allocator}
 \end{figure}
+
+Verified skeleton selection, reference duplication, and the learned \gate{}
+are, on the surface, three unrelated fixes: one picks a better pose control,
+one repeats a token block, one trains $\sim$200 parameters. What justifies
+treating them as one method rather than three tricks is that all three
+target the same bottleneck---the single joint-attention budget introduced in
+Sec.~\ref{sec:refgeometry}---without yet explaining \emph{why} that targeting
+works or \emph{how much} of the lost identity it can recover. Chapter~\ref{sec:whyworks}
+answers both questions directly, first verifying that identity really does
+flow through that budget rather than through some other pathway
+(Sec.~\ref{sec:refverify}), then quantifying exactly how the levers above
+reallocate it (Sec.~\ref{sec:mechanism}).
