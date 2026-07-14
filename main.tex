@@ -65,6 +65,18 @@
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
 \usepackage[breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
 
+% ---- Cover spine (書背, per NTUST reg. 附錄一) -------------------------------
+% tikz for absolute page-relative positioning of the spine block, pgffor's
+% \foreach (bundled with tikz) for stacking CJK characters one per line --
+% CJK glyphs read correctly top-to-bottom without needing rotation.
+\usepackage{tikz}
+% Stacks one CJK character per line. Ends with a trailing \\, so follow each
+% \vstack call with \vspace{...} (not \\[...]) for inter-block gaps -- two
+% consecutive \\ with nothing between them is a LaTeX error ("no line to
+% end"), which a trailing \\[gap] right after \vstack's own trailing \\
+% would trigger.
+\newcommand{\vstack}[1]{\foreach \c in {#1} { \c \\ }}
+
 % Citation style: kept as the paper's original IEEE style (ieeenat_fullname.bst),
 % NOT mandated by the university -- see SKILL.md if the department/advisor
 % requires a different style (APA/MLA/Chicago/etc).
@@ -133,6 +145,44 @@
 % 1. COVER (含書背) + 2. TITLE PAGE
 % =============================================================================
 \thispagestyle{empty}
+% ---- 書背 (spine), per NTUST reg. 附錄一 -- printed in the left margin, top to
+% bottom: 畢業離校年 (ROC year), school+department, degree type, thesis title,
+% author name. The regulation splits school-name and department onto two
+% side-by-side vertical columns; this combines them into one column for
+% simplicity (the regulation itself notes 附錄一's layout is for reference
+% only -- "以各系所規定為準"). Character lists are spelled out literally
+% (not derived from \deptnameZH/\thesisTitleZH/etc.) because \foreach does
+% not expand macros passed through another macro's argument -- keep these in
+% sync by hand if the corresponding front-matter macro changes.
+%
+% \foreach does not survive being placed directly inside a tikz \node{...}
+% text argument (group-scoping clash), so the content is fully typeset into
+% a normal box first (\sbox, plain LaTeX context, no tikz involved) and tikz
+% is used only to position that already-built box on the page.
+\newsavebox{\spinebox}
+\sbox{\spinebox}{%
+  \begin{minipage}{1.4cm}\centering
+  \singlespacing
+  \fontsize{10pt}{13pt}\selectfont\gradYearROC \\[1pt]
+  {\fontsize{7pt}{9pt}\selectfont（畢業離校年）}\\[14pt]
+  \fontsize{11pt}{14pt}\selectfont
+  \vstack{國,立,臺,灣,科,技,大,學,電,機,工,程,學,系}
+  \vspace{10pt}
+
+  \fontsize{11pt}{14pt}\selectfont \vstack{碩,士,論,文}
+  \vspace{10pt}
+
+  \fontsize{9.5pt}{12pt}\selectfont
+  \vstack{具,姿,態,校,正,效,能,指,標,之,指,定,姿,勢,個,人,化,文,字,轉,圖,像,生,成}
+  \vspace{10pt}
+
+  \fontsize{11pt}{14pt}\selectfont \vstack{李,酩,濠}
+  \end{minipage}%
+}
+\begin{tikzpicture}[remember picture, overlay]
+\node[anchor=north west, inner sep=0pt] at
+    ([xshift=0.6cm,yshift=-2.2cm]current page.north west) {\usebox{\spinebox}};
+\end{tikzpicture}
 \begin{center}
 \vspace*{4cm}
 
