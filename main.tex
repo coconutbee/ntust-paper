@@ -233,37 +233,18 @@
 \pagenumbering{Roman}
 
 % =============================================================================
-% 5. 中文摘要 CHINESE ABSTRACT
-%    Draft direct translation of the English abstract -- please review/polish.
+% Front-matter order per NTUST reg. Exhibit 7 (附錄七, the worked
+% Table-of-Contents example) rather than the numbered-list text in Sec. 3 --
+% the two disagree on where Acknowledgement falls (Exhibit 7 puts it first;
+% the numbered list puts it after both abstracts) and the user chose to
+% follow the exhibit. Order: Acknowledgement (I) -> Chinese abstract (II) ->
+% English abstract (III) -> TOC -> List of Symbols (IV) -> combined
+% Figure+Table index "圖表索引" (V) -> main body (Arabic, from 1).
 % =============================================================================
-\chapter*{中文摘要}
-\addcontentsline{toc}{chapter}{中文摘要}
 
-近期身分保真個人化生成方法雖能忠實重現參考人臉，卻普遍偏向正面視角；當使用者要求特定姿態（轉頭、回眸、抬頭或低頭）時，現有方法常崩潰回正面，忽略姿態要求。本論文研究「指定姿勢個人化文字轉圖像生成」：給定單一參考身分影像與姿態指令，生成符合姿態之同一身分影像，並以不偏正面之指標評估。
-
-本論文提出 Rotate-ID，建構於少步驟修正流擴散轉換器（FLUX.2-klein）之單參考影像個人化系統。結構化姿態控制以上下文提供，驅動頭部轉動；透過重新分配骨幹對參考影像之注意力達成身分保真——此機制經因果驗證為身分與姿態共享同一注意力預算，並萃取為約200參數可學習閘門（$\gamma$-gate），於不增姿態代價下精煉身分保真。
-
-人臉辨識器於正面可靠讀出身分，卻隨頭部轉離正面而低估相似度；本論文遂提出「姿態校正效能指標」：以可解釋三維姿態檢測驗證轉動指令、以姿態適配身分讀出器評分，並以姿態感知分數僅於達成姿態時計入身分分數，建立涵蓋8種姿態、40組請求之評測基準。此指標下，Rotate-ID 偏航角準確率(82.6\%)大幅超越最強基準PhotoMaker-V2(36.1\%)，於過肩與大角度轉動下仍為姿態感知身分保真最佳之免調校方法。
-
-\vspace{1em}
-\noindent 關鍵字：個人化文字轉圖像生成、身分保真、頭部姿態控制、擴散轉換器、注意力重新分配、修正流、姿態校正評估
-\clearpage
-
-% =============================================================================
-% 6. ENGLISH ABSTRACT
-% =============================================================================
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-
-\input{chapters/abstract_content}
-
-\vspace{1em}
-\noindent Keywords: Personalized Text-to-Image Generation, Identity Preservation, Head-Pose Control, Diffusion Transformer, Attention Reallocation, Rectified Flow, Pose-Rectified Evaluation
-\clearpage
-
-% =============================================================================
-% 7. 誌謝 ACKNOWLEDGEMENT (left blank per author's request)
-% =============================================================================
+% -----------------------------------------------------------------------------
+% 7 (moved first). 誌謝 ACKNOWLEDGEMENT
+% -----------------------------------------------------------------------------
 \chapter*{Acknowledgement}
 \addcontentsline{toc}{chapter}{Acknowledgement}
 本論文得以順利完成，首先要致上最誠摯的謝意給我的指導教授鍾聖倫教授與徐繼聖教授。感謝兩位老師在研究期間的悉心指導與包容，不僅在學術研究上引領我探索生成式 AI 與電腦視覺的奧秘，在論文的撰寫與邏輯推演上也給予了無數的啟發與指引。兩位老師嚴謹的治學態度與對研究的熱忱，將是我未來職涯中重要的榜樣。
@@ -276,17 +257,104 @@
 \clearpage
 
 % =============================================================================
+% 5. 中文摘要 CHINESE ABSTRACT
+%    Metadata header (title/student/advisor/date) per Exhibit 4 (附錄四).
+%    Draft direct translation of the English abstract -- please review/polish.
+%    Trimmed to <=500 characters per spec ("不超過500字或一頁為原則").
+% =============================================================================
+\chapter*{中文摘要}
+\addcontentsline{toc}{chapter}{中文摘要}
+\begin{center}
+{\fontsize{15pt}{20pt}\selectfont\bfseries \thesisTitleZH}\\[10pt]
+{\fontsize{12pt}{16pt}\selectfont
+研究生：李酩濠\\[2pt]
+指導教授：\advisorNameZH\\[2pt]
+時間：中華民國\gradYearROC 年\gradMonthZH 月}
+\end{center}
+\vspace{1em}
+
+近期身分保真個人化生成方法雖能忠實重現參考人臉，卻普遍偏向正面視角；當使用者要求特定姿態（轉頭、回眸、抬頭或低頭）時，現有方法常崩潰回正面。本論文研究「指定姿勢個人化文字轉圖像生成」：給定單一參考身分影像與姿態指令，生成符合姿態之同一身分影像，並以不偏正面之指標評估。
+
+本論文提出 Rotate-ID，建構於少步驟修正流擴散轉換器（FLUX.2-klein）之單參考影像個人化系統。結構化姿態控制以上下文提供，驅動頭部轉動；透過重新分配骨幹對參考影像之注意力達成身分保真——經因果驗證，身分與姿態共享同一注意力預算，並萃取為約200參數可學習閘門（$\gamma$-gate），於不增姿態代價下精煉身分保真。
+
+人臉辨識器於正面可靠讀出身分，卻隨頭部轉離正面而低估相似度；本論文遂提出「姿態校正效能指標」：以可解釋三維姿態檢測驗證轉動指令、以姿態適配身分讀出器評分，並僅於達成姿態時計入身分分數，建立涵蓋8種姿態、40組請求之評測基準。此指標下，Rotate-ID 偏航角準確率(82.6\%)大幅超越最強基準PhotoMaker-V2(36.1\%)，於過肩與大角度轉動下仍為姿態感知身分保真最佳之免調校方法。
+
+\vspace{1em}
+\noindent 關鍵字：個人化文字轉圖像生成、身分保真、頭部姿態控制、擴散轉換器、注意力重新分配、修正流、姿態校正評估
+\clearpage
+
+% =============================================================================
+% 6. ENGLISH ABSTRACT
+%    Title header per Exhibit 5 (附錄五).
+% =============================================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\begin{center}
+{\fontsize{15pt}{20pt}\selectfont\bfseries \thesisTitleEN}
+\end{center}
+\vspace{1em}
+
+\input{chapters/abstract_content}
+
+\vspace{1em}
+\noindent Keywords: Personalized Text-to-Image Generation, Identity Preservation, Head-Pose Control, Diffusion Transformer, Attention Reallocation, Rectified Flow, Pose-Rectified Evaluation
+\clearpage
+
+% =============================================================================
 % 8. 目錄 TABLE OF CONTENTS
 % =============================================================================
 \tableofcontents
 \clearpage
 
 % =============================================================================
-% 10-11. 圖目錄/表目錄 (thesis has well over 5 figures+tables combined)
+% 9. 符號索引 LIST OF SYMBOLS
+%    Not present before this pass -- added per Sec. 3 item 9 of the document
+%    order. Covers the notation used repeatedly across chapters (full
+%    per-chapter definitions remain where each symbol is first introduced;
+%    this is a lookup index, not a redefinition).
 % =============================================================================
-\listoffigures
+\chapter*{符號索引}
+\addcontentsline{toc}{chapter}{符號索引}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+符號 (Symbol) & 意義 (Meaning) \\
+\midrule
+$\theta_y$ & 頭部偏航角 head yaw \\
+$\theta_p$ & 頭部俯仰角 head pitch \\
+$\Delta\theta_y$ & 頭部相對軀幹偏航角 head-to-torso yaw (over-the-shoulder cue) \\
+$N$ & 參考影像複製次數 identity reference duplication count \\
+$k$ & 姿態感知懲罰強度 pose-aware penalty strength \\
+$P_e$ & 姿態未達成率 $1-\mathrm{Acc}_{\mathrm{yaw}}$ \\
+$s_{\mathrm{id}}$ & 身分區塊注意力佔比 identity-block attention share \\
+$\gamma$ & 學習閘門增益 learned attention-budget gain \\
+\csim{} & 人臉餘弦相似度 face cosine similarity \\
+$\widetilde{\mathrm{CSIM}}(k)$ & 姿態感知身分保真分數 pose-aware identity score \\
+\dupid{} & 參考影像複製法 reference duplication lever \\
+\gate{} & 可學習注意力預算分配器 learned attention-budget allocator \\
+PAEs & 姿態適配人臉辨識器 Pose-Adapted face Encoders \\
+OTS & 過肩姿態 over-the-shoulder \\
+\bottomrule
+\end{tabular}
+\end{center}
 \clearpage
-\listoftables
+
+% =============================================================================
+% 10-11. 圖表索引 (combined List of Figures + List of Tables per Exhibit 7 --
+% the section heading in Sec. 3 item 4-(七) lists them separately, but that
+% same rule's own body text and Exhibit 7 both call it one combined
+% "圖表索引"; user chose to follow the combined form. Figures listed first,
+% then tables, per Sec. 3 item 4-(七)-2's ordering rule. \listoffigures /
+% \listoftables each normally print their own chapter heading -- \@starttoc
+% is the underlying mechanism without that heading, so both lists share the
+% one "圖表索引" heading below instead of getting one each.
+% =============================================================================
+\chapter*{圖表索引}
+\addcontentsline{toc}{chapter}{圖表索引}
+\makeatletter
+\@starttoc{lof}
+\@starttoc{lot}
+\makeatother
 \clearpage
 
 % Main body uses Arabic page numbers starting at Chapter 1.
