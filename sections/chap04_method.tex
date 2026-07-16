@@ -1,3 +1,4 @@
+\chapter{Method}
 \label{sec:method}
 
 We target \emph{posture-requested} one-shot personalization: from a single reference image $I_{\mathrm{id}}$ of an identity and a posture request $p$, generate an image of \emph{that} identity at posture $p$. The text prompt is not a bare pose command: it carries the same scene, attire, and style detail an ordinary T2I prompt would, since posture control has to hold up embedded in a full generation, not only in isolation. These two items---$I_{\mathrm{id}}$ and $p$---are the \emph{only} inputs the user provides; every other signal the pipeline uses internally, including the structural pose control introduced in Sec.~\ref{sec:pose}, is constructed by the system itself from $p$, never supplied externally.
