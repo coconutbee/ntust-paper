@@ -88,8 +88,10 @@
 
 \renewcommand{\baselinestretch}{1}		% Set the line spacing to single for the titles (to compress the lines) 行距 1 倍
 
-%\Large{\cTitle}\\	% Chinese title 中文題目
-%
+\Large{\cTitle}\\	% Chinese title 中文題目 -- shown on the "Chinese Version" cover
+% (the upstream "English Version" template leaves this commented out and
+% shows only the English title; NTUST reg. requires the cover to be
+% bilingual, so this branch restores it.)
 \vspace{1cm}
 %
 \Large{\eTitle}\\	% English title 英文題目
