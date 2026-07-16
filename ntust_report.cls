@@ -110,7 +110,13 @@
 \fi
 \DeclareOption{11pt}{\renewcommand\@ptsize{1}}
 \DeclareOption{12pt}{\renewcommand\@ptsize{2}}
-%\DeclareOption{13pt}{\renewcommand\@ptsize{3}}
+\DeclareOption{14pt}{\IfFileExists{size14.clo}%
+  {\renewcommand\@ptsize{4}}%
+  {\renewcommand\@ptsize{2}%
+   \ClassError{\@classname}{You cannot use option `14pt'}%
+     {File `size14.clo' not found.
+      LaTeX package `extsizes' is not installed^^J%
+      properly in your system.}}}
 \if@compatibility\else
 \DeclareOption{oneside}{\@twosidefalse \@mparswitchfalse}
 \fi

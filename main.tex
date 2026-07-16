@@ -1,23 +1,31 @@
 % =============================================================================
 % NTUST (國立臺灣科技大學) Master's Thesis
-% Built on "NTUST Thesis template 2.0.1 (Chinese Version)" by Horseisfish
-% (Overleaf gallery: ntust-thesis-template-2-dot-0-1-chinese-version), modified
-% from Ding-Jie Huang & Chien-Chun Ni's 1.7.1. The preamble below (ctex,
-% cwTeXKai CJK font, tocdepth/secnumdepth=3, \input{chinese_trans}, sections/
-% N_slug.tex naming) is copied from the actual 2.0.1 my_ntust_thesis.tex
-% source, extracted from the Overleaf gallery page's own "View Source" preview
-% (no direct project/zip access was available). ntust_report.cls,
-% common_env.tex, frontpages/backpages structure are shared with 1.7.1 --
-% 2.0.1's own description states it only changes cover layout, chapter-number
-% display, and subsection heading display, all of which are handled in this
-% file's preamble plus the frontpages/ntust_frontpages.tex cover-title fix.
+% Built directly from the real "NTUST Thesis template 2.0.1 (Chinese Version)"
+% by Horseisfish (Overleaf gallery: ntust-thesis-template-2-dot-0-1-chinese-
+% version), source obtained as a zip export from the user. ntust_report.cls,
+% common_env.tex, chinese_trans.tex, frontpages/ntust_frontpages.tex,
+% backpages/ntust_backpages.tex, frontpages/NTUSTLogo.png, and watermark/ are
+% all copied verbatim from that zip (only the opt-in sections this thesis
+% actually needs -- symbol list, appendix, the two admin-form placeholder
+% pages -- were uncommented; see each file's own comments for what changed
+% and why). frontpages/my_*.tex, backpages/my_appendix.tex, and this file's
+% own content-package list are this thesis's own content, not template.
 %
-% Deliberate deviation: 2.0.1's real source loads ctex with heading=true,
-% which auto-localizes chapter labels to Chinese numerals ("第一章"). Body
-% content here is English and the chapter-numbering language was an explicit
-% user decision (keep "Chapter 1"), so ctex is loaded WITHOUT heading=true --
-% this preserves 2.0.1's actual package choice (better CJK typesetting than
-% xeCJK alone) without its Chinese-numeral side effect.
+% Two deliberate, explicit deviations from the template's literal defaults,
+% both from earlier user decisions in this same migration:
+%   1. Chapter numbering stays English ("Chapter 1"), not the template's
+%      Chinese-numeral default ("第一章") -- chinese_trans.tex omits the real
+%      source's \ctexset{chapter={name={第,章}, number=\chinese{chapter}}}.
+%   2. Figure/Table caption labels stay English ("Figure"/"Table"), not the
+%      template's default Chinese ("圖"/"表") -- explicit request.
+% Everything else (watermark enabled, 3.5cm top margin, 1.4x line spacing,
+% titletoc, algorithmic not algorithmicx, admin-form placeholder pages
+% active, cover layout incl. student-ID rule under the degree line) matches
+% the real template's own literal values, even where those differ from this
+% thesis's earlier NTUST-regulation-driven values (regulation text says top
+% margin 3cm and 1.5x spacing; the template itself uses 3.5cm/1.4x -- kept
+% as the template has it per explicit "strictly follow the template"
+% instruction; flagging here in case that should be revisited).
 %
 % Compile with XeLaTeX (CJK fonts require it):
 %   xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex
@@ -28,23 +36,22 @@
 
 \usepackage{fontspec}
 \usepackage{xeCJK}
-\usepackage[UTF8]{ctex}   % 2.0.1's actual choice; heading=true omitted, see note above
+\usepackage[UTF8]{ctex}   % heading=true omitted -- see note above (English chapter numbering)
 
 \setmainfont[Mapping=tex-text]{Times New Roman}
-\setCJKmainfont[AutoFakeBold={4}]{cwTeXKai}   % 2.0.1's actual CJK font (was AR PL KaitiM Big5 in 1.7.1)
+\setCJKmainfont[AutoFakeBold={4}]{cwTeXKai}
 \XeTeXlinebreaklocale "zh"
 \XeTeXlinebreakskip = 0pt plus 1pt
 
 \setcounter{tocdepth}{3}
 \setcounter{secnumdepth}{3}
 
-\input{common_env}   % template's fixed environment (margins, page style, etc.) -- do not alter
+\input{common_env}   % template's fixed environment (margins, page style, watermark, titletoc, etc.) -- do not alter
 
-% ---- Packages the actual chapter content needs (not shown in 2.0.1's minimal
-% template stub, which only demonstrates the skeleton -- these are the same
-% packages the previous single-file build already relied on) --------
-\usepackage{amssymb}
-\usepackage{subfig}
+% ---- Packages the actual chapter content needs (not part of the template --
+% common_env.tex already provides titletoc, cite, geometry, subfigure,
+% multirow, graphicx, algorithmic, amsmath, amssymb, mathrsfs, listings, url,
+% fancyhdr) --------
 \usepackage{tabularx}
 \usepackage{amsfonts}
 \usepackage{comment}
@@ -53,16 +60,12 @@
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \usepackage{pdfpages}
 
-\usepackage{graphicx}
 \usepackage{adjustbox}
-\usepackage{amsmath}
-\usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{pifont}
 \usepackage{placeins}
 \usepackage{enumitem}
 \usepackage{xspace}
-\usepackage[titles]{tocloft}
 \usepackage{titlesec}
 
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
