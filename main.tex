@@ -1,59 +1,41 @@
 % =============================================================================
 % NTUST (國立臺灣科技大學) Master's Thesis
-% Converted from the CVPR-style submission paper at RotateID_overleaf.
-% Implements: 國立臺灣科技大學學位論文撰寫、編排規則及注意事項
-%             (112.03.07 第211次教務會議通過 / 113.12.24 第218次教務會議通過)
+% Built on the official "NTUST Thesis template 1.7.1 (English Version)"
+% (Overleaf gallery: ntust-thesis-template-1-dot-7-1-english-version,
+%  source: github.com/hadziq/ntust-thesis, credit: Ding-Jie Huang).
+% This file plays the role of the template's own `my_ntust_thesis.tex`.
 %
 % Compile with XeLaTeX (CJK fonts require it):
 %   xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex
 % =============================================================================
 
-\documentclass[12pt,a4paper]{report}
+% !TEX program = xelatex
+\documentclass[12pt, a4paper]{ntust_report}
 
-% ---- Page geometry: top 3cm / bottom 2cm / left 3cm / right 3cm ------------
-\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm]{geometry}
+\usepackage{amssymb}
+\usepackage{fontspec}  % To enable font settings
+\usepackage{xeCJK}     % To let Chinese/English fonts be set separately
 
-% report defaults to \flushbottom, which stretches interline glue to justify
-% the bottom margin; \raggedbottom lets text pages end short instead.
-\raggedbottom
-
-% Separately: when a [t]-placed figure/table doesn't fit on the current page
-% and becomes the sole content of the next one, LaTeX's float-page routine
-% centers it by splitting the leftover space into equal stretchy glue above
-% and below (\@fptop / \@fpbot), regardless of raggedbottom -- that's what
-% pushes a lone figure down into a large blank gap instead of sitting at the
-% top like [t] implies. Making \@fptop non-stretchy and letting \@fpbot
-% absorb all the slack pins lone floats to the top of their page.
-\makeatletter
-\setlength{\@fptop}{0pt}
-\setlength{\@fpbot}{0pt plus 1fil}
-\makeatother
-
-% ---- CJK + Latin fonts ------------------------------------------------------
-% See ntust-thesis-format skill's SKILL.md "Known gaps" -- font availability
-% varies by compile environment; swap to the commented alternatives if the
-% real 標楷體/Times New Roman fonts are available where this is compiled
-% (Overleaf's font menu typically has both).
-\usepackage{xeCJK}
-\setCJKmainfont{Noto Sans CJK TC}          % <- working default; spec prefers Kaiti/PMingLiU
-% \setCJKmainfont{Kaiti TC}
-% \setCJKmainfont{AR PL KaitiM Big5}
-% \setCJKmainfont{PMingLiU}
-\setmainfont{Liberation Serif}             % <- metrically compatible Times New Roman substitute
-% \setmainfont{Times New Roman}
+\setmainfont[Mapping=tex-text]{Times New Roman}
+\setCJKmainfont{AR PL KaitiM Big5}   % open-source Kaiti-style face, matches spec's 標楷體 requirement
 \XeTeXlinebreaklocale "zh"
-\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+\XeTeXlinebreakskip = 0pt plus 1pt
 
-% ---- 1.5x line spacing (spec: 行距1.5倍行高) --------------------------------
-\usepackage{setspace}
-\onehalfspacing
+\input{common_env}   % template's fixed environment (margins, page style, etc.) -- do not alter
 
-% ---- Packages carried over from the CVPR source (chapters use these) -------
+% ---- Packages carried over from the previous single-file build (chapters use these) --------
+\usepackage{subfig}
+\usepackage{tabularx}
+\usepackage{amsfonts}
+\usepackage{comment}
+\usepackage{rotating}
+\usepackage{booktabs,threeparttable}
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+\usepackage{pdfpages}
+
 \usepackage{graphicx}
 \usepackage{adjustbox}
-\usepackage{amsmath,amssymb}
-\usepackage{booktabs}
-\usepackage{threeparttable}
+\usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{pifont}
@@ -62,51 +44,21 @@
 \usepackage{xspace}
 \usepackage[titles]{tocloft}
 \usepackage{titlesec}
+
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
 \usepackage[breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
 
-% ---- Cover spine (書背, per NTUST reg. 附錄一) -------------------------------
-% tikz for absolute page-relative positioning of the spine block, pgffor's
-% \foreach (bundled with tikz) for stacking CJK characters one per line --
-% CJK glyphs read correctly top-to-bottom without needing rotation.
-\usepackage{tikz}
-% Stacks one CJK character per line. Ends with a trailing \\, so follow each
-% \vstack call with \vspace{...} (not \\[...]) for inter-block gaps -- two
-% consecutive \\ with nothing between them is a LaTeX error ("no line to
-% end"), which a trailing \\[gap] right after \vstack's own trailing \\
-% would trigger.
-\newcommand{\vstack}[1]{\foreach \c in {#1} { \c \\ }}
+% report-class raggedbottom + float-page glue fix: pins a lone [t]-placed
+% figure/table to the top of its page instead of centering it in a blank gap.
+\raggedbottom
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
 
-% Citation style: kept as the paper's original IEEE style (ieeenat_fullname.bst),
-% NOT mandated by the university -- see SKILL.md if the department/advisor
-% requires a different style (APA/MLA/Chicago/etc).
-% natbib MUST be loaded with [numbers,sort&compress] (as the CVPR source's
-% cvpr.sty does) or \cite silently falls back to natbib's verbose author-year
-% mode -- full author lists like "[Deng et al.(2019)Deng, Guo, Xue, and
-% Zafeiriou]" inline, which do not wrap and run hundreds of points off the
-% page margin.
-\usepackage[numbers,sort&compress]{natbib}
-\bibliographystyle{ieeenat_fullname}
-
-% ---- Method-specific macros carried over verbatim from the CVPR source -----
-\newcommand{\todo}[1]{\textcolor{red}{[\textbf{TODO:} #1]}}
-\newcommand{\tbd}{\textcolor{red}{$\ldots$}}
-% NOTE: the CVPR source used \textsc{} for these (small-caps method names).
-% Liberation Serif has no true small-caps glyphs, and XeTeX's NFSS shape
-% substitution for the resulting undefined `sc' shape leaks past its group
-% and corrupts the ambient font shape for the rest of the document (massive
-% overfull \hbox warnings from chapter 1 onward). Use bold instead here.
-\newcommand{\method}{\textbf{Rotate-ID}\xspace}
-\newcommand{\dupid}{\textbf{dup-id}\xspace}
-\newcommand{\csim}{\textbf{csim}\xspace}
-\newcommand{\gate}{$\gamma$-\textbf{gate}\xspace}
-\newcommand{\cmark}{\textcolor{green!55!black}{\ding{51}}}
-\newcommand{\xmark}{\textcolor{red!70!black}{\ding{55}}}
-\newcommand{\pmark}{\textcolor{orange!95!black}{$\circ$}}
-
-% ---- Font sizes per spec ----------------------------------------------------
-% Chapter title 20pt centered; section/subsection headings 18pt left-aligned;
-% body 12pt (documentclass option above).
+% ---- Font sizes per NTUST spec: chapter title 20pt centered; section/subsection 18pt left-aligned.
+% ntust_report.cls itself only uses the relative size \LARGE for chapter heads (not literally
+% 20pt at this 12pt base), so this overrides it explicitly, same as the previous build.
 \titleformat{\chapter}[display]
   {\centering\normalfont\fontsize{20pt}{28pt}\selectfont\bfseries}
   {\chaptertitlename\ \thechapter}{0.5em}{}
@@ -117,290 +69,47 @@
   {\raggedright\normalfont\fontsize{18pt}{24pt}\selectfont\bfseries}
   {\thesubsection}{0.5em}{}
 
-% Figures/tables are numbered per-chapter automatically by the `report` class.
+% Figures/tables are numbered per-chapter automatically by ntust_report.cls.
 
-% ---- Front-matter metadata --------------------------------------------------
-\newcommand{\deptnameZH}{電機工程學系}
-\newcommand{\deptnameEN}{Electrical Engineering}
-\newcommand{\degreeZH}{碩}
-\newcommand{\thesisTitleZH}{具姿態校正效能指標之指定姿勢個人化文字轉圖像生成}
-\newcommand{\thesisTitleEN}{Posture-Requested Personalized Text-to-Image Generation with Pose-Rectified Performance Metrics}
-% *** AUTHOR NAME NOT YET SUPPLIED -- fill in before compiling for real. ***
-\newcommand{\authorNameZH}{[[AUTHOR NAME -- Chinese]]}
-\newcommand{\authorNameEN}{[[AUTHOR NAME -- English]]}
-\newcommand{\advisorNameZH}{鍾聖倫、徐繼聖 博士}
-\newcommand{\advisorNameEN}{Sheng-Luen Chung, Gee-Sern Hsu, Ph.D.}
-
-
-% Graduation stated as 115/7 (July); spec requires printing JUNE for the
-% summer 7-8 month administrative window regardless of actual defense month.
-\newcommand{\gradYearROC}{115}
-\newcommand{\gradMonthZH}{六}
-\newcommand{\gradYearGregorian}{2026}
-\newcommand{\gradMonthEN}{June}
+% ---- Method-specific macros carried over verbatim from the previous build ----
+\newcommand{\todo}[1]{\textcolor{red}{[\textbf{TODO:} #1]}}
+\newcommand{\tbd}{\textcolor{red}{$\ldots$}}
+\newcommand{\method}{\textbf{Rotate-ID}\xspace}
+\newcommand{\dupid}{\textbf{dup-id}\xspace}
+\newcommand{\csim}{\textbf{csim}\xspace}
+\newcommand{\gate}{$\gamma$-\textbf{gate}\xspace}
+\newcommand{\cmark}{\textcolor{green!55!black}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{red!70!black}{\ding{55}}}
+\newcommand{\pmark}{\textcolor{orange!95!black}{$\circ$}}
 
 \begin{document}
 
-% =============================================================================
-% 1. COVER (含書背) + 2. TITLE PAGE
-% =============================================================================
-\thispagestyle{empty}
-% ---- 書背 (spine), per NTUST reg. 附錄一 -- printed in the left margin, top to
-% bottom: 畢業離校年 (ROC year), school+department, degree type, thesis title,
-% author name. The regulation splits school-name and department onto two
-% side-by-side vertical columns; this combines them into one column for
-% simplicity (the regulation itself notes 附錄一's layout is for reference
-% only -- "以各系所規定為準"). Character lists are spelled out literally
-% (not derived from \deptnameZH/\thesisTitleZH/etc.) because \foreach does
-% not expand macros passed through another macro's argument -- keep these in
-% sync by hand if the corresponding front-matter macro changes.
-%
-% \foreach does not survive being placed directly inside a tikz \node{...}
-% text argument (group-scoping clash), so the content is fully typeset into
-% a normal box first (\sbox, plain LaTeX context, no tikz involved) and tikz
-% is used only to position that already-built box on the page.
-\newsavebox{\spinebox}
-\sbox{\spinebox}{%
-  \begin{minipage}{1.4cm}\centering
-  \singlespacing
-  \fontsize{10pt}{13pt}\selectfont\gradYearROC \\[1pt]
-  {\fontsize{7pt}{9pt}\selectfont（畢業離校年）}\\[14pt]
-  \fontsize{11pt}{14pt}\selectfont
-  \vstack{國,立,臺,灣,科,技,大,學,電,機,工,程,學,系}
-  \vspace{10pt}
+\input{english_trans}   % section-heading label glossary (\nameAckn, \nameToc, ...) -- do not alter
 
-  \fontsize{11pt}{14pt}\selectfont \vstack{碩,士,論,文}
-  \vspace{10pt}
+%-----------------------------------------------------------------------------
+% Front pages: cover, title page, Chinese/English abstract, acknowledgement,
+% table of contents, list of figures, list of tables, list of symbols.
+% Structure is fixed by the template (frontpages/ntust_frontpages.tex);
+% actual content lives in frontpages/my_*.tex.
+%-----------------------------------------------------------------------------
+\input{frontpages/ntust_frontpages.tex}
 
-  \fontsize{9.5pt}{12pt}\selectfont
-  \vstack{具,姿,態,校,正,效,能,指,標,之,指,定,姿,勢,個,人,化,文,字,轉,圖,像,生,成}
-  \vspace{10pt}
+%-----------------------------------------------------------------------------
+% Main body
+%-----------------------------------------------------------------------------
+\input{sections/chap01_introduction.tex}
+\input{sections/chap02_related_work.tex}
+\input{sections/chap03_metrics.tex}
+\input{sections/chap04_method.tex}
+\input{sections/chap05_mechanism.tex}
+\input{sections/chap06_experiments.tex}
+\input{sections/chap07_limitations.tex}
+\input{sections/chap08_conclusion.tex}
 
-  \fontsize{11pt}{14pt}\selectfont \vstack{李,酩,濠}
-  \end{minipage}%
-}
-\begin{tikzpicture}[remember picture, overlay]
-\node[anchor=north west, inner sep=0pt] at
-    ([xshift=0.6cm,yshift=-2.2cm]current page.north west) {\usebox{\spinebox}};
-\end{tikzpicture}
-\begin{center}
-\vspace*{4cm}
-
-{\fontsize{18pt}{24pt}\selectfont 國立臺灣科技大學\deptnameZH} \\[2pt]
-{\fontsize{18pt}{24pt}\selectfont \degreeZH 士論文} \\[12pt]
-
-{\fontsize{14pt}{18pt}\selectfont Department or Graduate Institute of \deptnameEN} \\[4pt]
-{\fontsize{16pt}{20pt}\selectfont National Taiwan University of Science And Technology} \\
-{\fontsize{16pt}{20pt}\selectfont Master Thesis/Doctoral Dissertation} \\[24pt]
-
-{\fontsize{18pt}{27pt}\selectfont \thesisTitleZH} \\[6pt]
-{\fontsize{18pt}{24pt}\selectfont \thesisTitleEN} \\[24pt]
-
-{\fontsize{18pt}{24pt}\selectfont 李酩濠} \\[4pt]
-{\fontsize{18pt}{24pt}\selectfont Ming-Hao L} \\[24pt]
-
-{\fontsize{18pt}{24pt}\selectfont 指導教授：\advisorNameZH} \\[4pt]
-{\fontsize{18pt}{24pt}\selectfont Advisor: \advisorNameEN} \\[24pt]
-
-{\fontsize{18pt}{24pt}\selectfont 中華民國 \gradYearROC\ 年 \gradMonthZH\ 月} \\
-{\fontsize{18pt}{24pt}\selectfont \gradMonthEN\ \gradYearGregorian}
-
-\vspace*{3cm}
-\end{center}
-\clearpage
-
-% =============================================================================
-% 3-4. RECOMMENDATION FORM + EXAM COMMITTEE FORM
-% *** DO NOT hand-typeset -- obtain from 學生資訊系統 after registering the
-% thesis there; insert the signed PDF pages here (e.g. via \usepackage{pdfpages}
-% and \includepdf[pages=-]{...}). Placeholder pages only below. ***
-% =============================================================================
-\thispagestyle{empty}
-\begin{center}
-\vspace*{4cm}
-\textit{[Insert official 指導教授推薦書 here -- obtain from 學生資訊系統]}
-\end{center}
-\clearpage
-
-\thispagestyle{empty}
-\begin{center}
-\vspace*{4cm}
-\textit{[Insert official 學位考試委員審定書 here -- obtain from 學生資訊系統]}
-\end{center}
-\clearpage
-
-% Front matter uses UPPERCASE Roman-numeral page numbers per spec.
-\pagenumbering{Roman}
-
-% =============================================================================
-% Front-matter order per NTUST reg. Exhibit 7 (附錄七, the worked
-% Table-of-Contents example) rather than the numbered-list text in Sec. 3 --
-% the two disagree on where Acknowledgement falls (Exhibit 7 puts it first;
-% the numbered list puts it after both abstracts) and the user chose to
-% follow the exhibit. Order: Acknowledgement (I) -> Chinese abstract (II) ->
-% English abstract (III) -> TOC -> List of Symbols (IV) -> combined
-% Figure+Table index "圖表索引" (V) -> main body (Arabic, from 1).
-% =============================================================================
-
-% -----------------------------------------------------------------------------
-% 7 (moved first). 誌謝 ACKNOWLEDGEMENT
-% -----------------------------------------------------------------------------
-\chapter*{Acknowledgement}
-\addcontentsline{toc}{chapter}{Acknowledgement}
-本論文得以順利完成，首先要致上最誠摯的謝意給我的指導教授鍾聖倫教授與徐繼聖教授。感謝兩位老師在研究期間的悉心指導與包容，不僅在學術研究上引領我探索生成式 AI 與電腦視覺的奧秘，在論文的撰寫與邏輯推演上也給予了無數的啟發與指引。兩位老師嚴謹的治學態度與對研究的熱忱，將是我未來職涯中重要的榜樣。
-
-研究的道路上並非孤軍奮戰，感謝實驗室的學長姐們在初期給予的引導，讓我能快速熟悉研究環境。更要特別感謝與我並肩作戰的同窗好友涂竣凱，我們一起討論深度學習模型、熬夜趕報告、互相打氣的日子，是研究所生涯中最珍貴的回憶。
-
-最後，我要將這份喜悅與感謝獻給我的家人。感謝父母親多年來的栽培與無私的奉獻，您們在背後默默的支持、包容與鼓勵，是我能夠無後顧之憂、全心投入學業並完成學位最大的動力。
-
-碩士生涯的結束是另一個階段的開始。感謝這段期間所有曾經幫助過我的人，願將這份完成論文的榮耀與喜悅與您們共享。
-\clearpage
-
-% =============================================================================
-% 5. 中文摘要 CHINESE ABSTRACT
-%    Metadata header (title/student/advisor/date) per Exhibit 4 (附錄四).
-%    Draft direct translation of the English abstract -- please review/polish.
-%    Trimmed to <=500 characters per spec ("不超過500字或一頁為原則").
-% =============================================================================
-\chapter*{中文摘要}
-\addcontentsline{toc}{chapter}{中文摘要}
-\begin{center}
-{\fontsize{15pt}{20pt}\selectfont\bfseries \thesisTitleZH}\\[10pt]
-{\fontsize{12pt}{16pt}\selectfont
-研究生：李酩濠\\[2pt]
-指導教授：\advisorNameZH\\[2pt]
-時間：中華民國\gradYearROC 年\gradMonthZH 月}
-\end{center}
-\vspace{1em}
-
-近期身分保真個人化生成方法雖能忠實重現參考人臉，卻普遍偏向正面視角；當使用者要求特定姿態（轉頭、回眸、抬頭或低頭）時，現有方法常崩潰回正面。本論文研究「指定姿勢個人化文字轉圖像生成」：給定單一參考身分影像與姿態指令，生成符合姿態之同一身分影像，並以不偏正面之指標評估。
-
-本論文提出 Rotate-ID，建構於少步驟修正流擴散轉換器（FLUX.2-klein）之單參考影像個人化系統。結構化姿態控制以上下文提供，驅動頭部轉動；透過重新分配骨幹對參考影像之注意力達成身分保真——經因果驗證，身分與姿態共享同一注意力預算，並萃取為約200參數可學習閘門（$\gamma$-gate），於不增姿態代價下精煉身分保真。
-
-人臉辨識器於正面可靠讀出身分，卻隨頭部轉離正面而低估相似度；本論文遂提出「姿態校正效能指標」：以可解釋三維姿態檢測驗證轉動指令、以姿態適配身分讀出器評分，並僅於達成姿態時計入身分分數，建立涵蓋8種姿態、40組請求之評測基準。此指標下，Rotate-ID 偏航角準確率(82.6\%)大幅超越最強基準PhotoMaker-V2(36.1\%)，於過肩與大角度轉動下仍為姿態感知身分保真最佳之免調校方法。
-
-\vspace{1em}
-\noindent 關鍵字：個人化文字轉圖像生成、身分保真、頭部姿態控制、擴散轉換器、注意力重新分配、修正流、姿態校正評估
-\clearpage
-
-% =============================================================================
-% 6. ENGLISH ABSTRACT
-%    Title header per Exhibit 5 (附錄五).
-% =============================================================================
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-\begin{center}
-{\fontsize{15pt}{20pt}\selectfont\bfseries \thesisTitleEN}
-\end{center}
-\vspace{1em}
-
-\input{chapters/abstract_content}
-
-\vspace{1em}
-\noindent Keywords: Personalized Text-to-Image Generation, Identity Preservation, Head-Pose Control, Diffusion Transformer, Attention Reallocation, Rectified Flow, Pose-Rectified Evaluation
-\clearpage
-
-% =============================================================================
-% 8. 目錄 TABLE OF CONTENTS
-% =============================================================================
-\tableofcontents
-\clearpage
-
-% =============================================================================
-% 9. 符號索引 LIST OF SYMBOLS
-%    Not present before this pass -- added per Sec. 3 item 9 of the document
-%    order. Covers the notation used repeatedly across chapters (full
-%    per-chapter definitions remain where each symbol is first introduced;
-%    this is a lookup index, not a redefinition).
-% =============================================================================
-\chapter*{符號索引}
-\addcontentsline{toc}{chapter}{符號索引}
-\begin{center}
-\begin{tabular}{ll}
-\toprule
-符號 (Symbol) & 意義 (Meaning) \\
-\midrule
-$\theta_y$ & 頭部偏航角 head yaw \\
-$\theta_p$ & 頭部俯仰角 head pitch \\
-$\Delta\theta_y$ & 頭部相對軀幹偏航角 head-to-torso yaw (over-the-shoulder cue) \\
-$N$ & 參考影像複製次數 identity reference duplication count \\
-$k$ & 姿態感知懲罰強度 pose-aware penalty strength \\
-$P_e$ & 姿態未達成率 $1-\mathrm{Acc}_{\mathrm{yaw}}$ \\
-$s_{\mathrm{id}}$ & 身分區塊注意力佔比 identity-block attention share \\
-$\gamma$ & 學習閘門增益 learned attention-budget gain \\
-\csim{} & 人臉餘弦相似度 face cosine similarity \\
-$\widetilde{\mathrm{CSIM}}(k)$ & 姿態感知身分保真分數 pose-aware identity score \\
-\dupid{} & 參考影像複製法 reference duplication lever \\
-\gate{} & 可學習注意力預算分配器 learned attention-budget allocator \\
-PAEs & 姿態適配人臉辨識器 Pose-Adapted face Encoders \\
-OTS & 過肩姿態 over-the-shoulder \\
-\bottomrule
-\end{tabular}
-\end{center}
-\clearpage
-
-% =============================================================================
-% 10-11. 圖表索引 (combined List of Figures + List of Tables per Exhibit 7 --
-% the section heading in Sec. 3 item 4-(七) lists them separately, but that
-% same rule's own body text and Exhibit 7 both call it one combined
-% "圖表索引"; user chose to follow the combined form. Figures listed first,
-% then tables, per Sec. 3 item 4-(七)-2's ordering rule. \listoffigures /
-% \listoftables each normally print their own chapter heading -- \@starttoc
-% is the underlying mechanism without that heading, so both lists share the
-% one "圖表索引" heading below instead of getting one each.
-% =============================================================================
-\chapter*{圖表索引}
-\addcontentsline{toc}{chapter}{圖表索引}
-\makeatletter
-\@starttoc{lof}
-\@starttoc{lot}
-\makeatother
-\clearpage
-
-% Main body uses Arabic page numbers starting at Chapter 1.
-\pagenumbering{arabic}
-\setcounter{page}{1}
-
-% =============================================================================
-% 12. 正文 MAIN BODY
-% =============================================================================
-
-\chapter{Introduction}
-\input{chapters/chap01_introduction}
-
-\chapter{Related Work}
-\input{chapters/chap02_related_work}
-
-\chapter{Pose-Rectified Performance Metrics}
-\input{chapters/chap03_metrics}
-
-\chapter{Method}
-\input{chapters/chap04_method}
-
-\chapter{Why It Works: One Attention Budget}
-\input{chapters/chap05_mechanism}
-
-\chapter{Experiments}
-\input{chapters/chap06_experiments}
-
-\chapter{Limitations}
-\input{chapters/chap07_limitations}
-
-\chapter{Conclusion}
-\input{chapters/chap08_conclusion}
-
-% =============================================================================
-% 13. 參考文獻 REFERENCES
-% =============================================================================
-\clearpage
-\addcontentsline{toc}{chapter}{References}
-\bibliography{refs}
-
-% =============================================================================
-% 14. 附錄 APPENDIX
-% =============================================================================
-\appendix
-\chapter{Supplementary Results}
-\input{chapters/appendix_content}
+%-----------------------------------------------------------------------------
+% Back pages: references, appendix. Structure is fixed by the template
+% (backpages/ntust_backpages.tex); actual content lives in backpages/my_*.tex.
+%-----------------------------------------------------------------------------
+\input{backpages/ntust_backpages.tex}
 
 \end{document}
