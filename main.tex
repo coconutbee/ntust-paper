@@ -1,14 +1,23 @@
 % =============================================================================
 % NTUST (國立臺灣科技大學) Master's Thesis
-% Branch variant: based on the "NTUST Thesis template 1.7.1 (English Version)"
-% source (github.com/hadziq/ntust-thesis, credit: Ding-Jie Huang), with the
-% cover-title fix from "NTUST Thesis template 2.0.1 (Chinese Version)" by
-% Horseisfish applied on top -- that fork's actual source isn't public, only
-% its own change description ("cover layout, Chinese-numeral chapter
-% headings, subsection heading display"); chapter numbering here stays
-% English per the user's explicit choice (body content is English), so only
-% the bilingual-cover-title fix is carried over. See main branch for the
-% straight 1.7.1 English-Version build.
+% Built on "NTUST Thesis template 2.0.1 (Chinese Version)" by Horseisfish
+% (Overleaf gallery: ntust-thesis-template-2-dot-0-1-chinese-version), modified
+% from Ding-Jie Huang & Chien-Chun Ni's 1.7.1. The preamble below (ctex,
+% cwTeXKai CJK font, tocdepth/secnumdepth=3, \input{chinese_trans}, sections/
+% N_slug.tex naming) is copied from the actual 2.0.1 my_ntust_thesis.tex
+% source, extracted from the Overleaf gallery page's own "View Source" preview
+% (no direct project/zip access was available). ntust_report.cls,
+% common_env.tex, frontpages/backpages structure are shared with 1.7.1 --
+% 2.0.1's own description states it only changes cover layout, chapter-number
+% display, and subsection heading display, all of which are handled in this
+% file's preamble plus the frontpages/ntust_frontpages.tex cover-title fix.
+%
+% Deliberate deviation: 2.0.1's real source loads ctex with heading=true,
+% which auto-localizes chapter labels to Chinese numerals ("第一章"). Body
+% content here is English and the chapter-numbering language was an explicit
+% user decision (keep "Chapter 1"), so ctex is loaded WITHOUT heading=true --
+% this preserves 2.0.1's actual package choice (better CJK typesetting than
+% xeCJK alone) without its Chinese-numeral side effect.
 %
 % Compile with XeLaTeX (CJK fonts require it):
 %   xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex
@@ -17,18 +26,24 @@
 % !TEX program = xelatex
 \documentclass[12pt, a4paper]{ntust_report}
 
-\usepackage{amssymb}
-\usepackage{fontspec}  % To enable font settings
-\usepackage{xeCJK}     % To let Chinese/English fonts be set separately
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage[UTF8]{ctex}   % 2.0.1's actual choice; heading=true omitted, see note above
 
 \setmainfont[Mapping=tex-text]{Times New Roman}
-\setCJKmainfont{AR PL KaitiM Big5}   % open-source Kaiti-style face, matches spec's 標楷體 requirement
+\setCJKmainfont[AutoFakeBold={4}]{cwTeXKai}   % 2.0.1's actual CJK font (was AR PL KaitiM Big5 in 1.7.1)
 \XeTeXlinebreaklocale "zh"
 \XeTeXlinebreakskip = 0pt plus 1pt
 
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
 \input{common_env}   % template's fixed environment (margins, page style, etc.) -- do not alter
 
-% ---- Packages carried over from the previous single-file build (chapters use these) --------
+% ---- Packages the actual chapter content needs (not shown in 2.0.1's minimal
+% template stub, which only demonstrates the skeleton -- these are the same
+% packages the previous single-file build already relied on) --------
+\usepackage{amssymb}
 \usepackage{subfig}
 \usepackage{tabularx}
 \usepackage{amsfonts}
@@ -63,7 +78,7 @@
 
 % ---- Font sizes per NTUST spec: chapter title 20pt centered; section/subsection 18pt left-aligned.
 % ntust_report.cls itself only uses the relative size \LARGE for chapter heads (not literally
-% 20pt at this 12pt base), so this overrides it explicitly, same as the previous build.
+% 20pt at this 12pt base), so this overrides it explicitly.
 \titleformat{\chapter}[display]
   {\centering\normalfont\fontsize{20pt}{28pt}\selectfont\bfseries}
   {\chaptertitlename\ \thechapter}{0.5em}{}
@@ -89,7 +104,7 @@
 
 \begin{document}
 
-\input{english_trans}   % section-heading label glossary (\nameAckn, \nameToc, ...) -- do not alter
+\input{chinese_trans}   % section-heading label glossary (\nameAckn, \nameToc, ...) -- do not alter
 
 %-----------------------------------------------------------------------------
 % Front pages: cover, title page, Chinese/English abstract, acknowledgement,
@@ -102,14 +117,14 @@
 %-----------------------------------------------------------------------------
 % Main body
 %-----------------------------------------------------------------------------
-\input{sections/chap01_introduction.tex}
-\input{sections/chap02_related_work.tex}
-\input{sections/chap03_metrics.tex}
-\input{sections/chap04_method.tex}
-\input{sections/chap05_mechanism.tex}
-\input{sections/chap06_experiments.tex}
-\input{sections/chap07_limitations.tex}
-\input{sections/chap08_conclusion.tex}
+\input{sections/1_introduction.tex}
+\input{sections/2_related_work.tex}
+\input{sections/3_metrics.tex}
+\input{sections/4_method.tex}
+\input{sections/5_mechanism.tex}
+\input{sections/6_experiments.tex}
+\input{sections/7_limitations.tex}
+\input{sections/8_conclusion.tex}
 
 %-----------------------------------------------------------------------------
 % Back pages: references, appendix. Structure is fixed by the template
