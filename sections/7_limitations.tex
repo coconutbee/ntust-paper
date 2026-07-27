@@ -15,7 +15,16 @@ Our learned allocator works because it acts
 inside the existing attention budget; attempts to train a fresh, higher-capacity
 identity pathway did not generalize at our identity count, leaving open whether
 that is a data-scale or a distillation effect (the few-step backbone runs
-off-distribution under heavy conditioning).
+off-distribution under heavy conditioning). \revised{The same finite budget bounds
+how much additional prompt content the pipeline can absorb: appending an
+expression clause to the prompt leaves identity CSIM essentially unchanged
+($0.292$, baseline vs.\ $+$expression); an accessory clause does lower it (to
+$0.23$), consistent with glasses/sunglasses genuinely occluding the face
+region rather than a method failure. But \emph{every} added clause costs yaw
+accuracy by a comparable margin ($80\%{\to}65$--$69\%$), regardless of whether
+it is an expression or an accessory (App.~\ref{sec:appendix_condition1})---additional
+semantic content competes for the same attention budget that would otherwise
+go toward pose, not toward identity.}
 
 \section{The one-shot ceiling}
 \label{sec:lim-oneshot}

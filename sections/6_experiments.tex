@@ -136,7 +136,14 @@ rotates is scored in the encoder's most generous regime. Read identity \emph{at
 the pose actually produced} and the picture inverts: the pose-adapted PAEs
 lifts Rotate-ID's identity to $0.377$, and under the pose-aware
 $\widetilde{\mathrm{CSIM}}$ (Table~\ref{tab:posepenalized}) the ranking flips
-outright. Rotate-ID is the only tuning-free method that produces profile views
+outright. \revised{Concretely, ranking all $13$ identity-conditioned methods
+(Table~\ref{tab:sota_pose}) by raw AdaFace \csim{} and again by
+$\widetilde{\mathrm{CSIM}}$ at $k{=}4$ (Table~\ref{tab:posepenalized}):
+\textbf{InstantID} falls from rank $1/13$ (raw, $0.743$) to rank $6/13$
+(pose-aware, $0.019$), while \textbf{Rotate-ID} rises from rank $12/13$ (raw,
+$0.297$) to rank $1/13$ (pose-aware, $0.148$)---the same two tables already in
+this chapter, read as an explicit rank comparison rather than only by value.}
+Rotate-ID is the only tuning-free method that produces profile views
 at all, keeping identity non-trivial precisely where the others never
 arrive---the frontal-collapse our core claim predicts. Figure~\ref{fig:teaser}
 shows this qualitatively.

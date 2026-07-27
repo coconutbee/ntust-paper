@@ -291,7 +291,9 @@ the face, run frozen AdaFace, and penalize
 \label{eq:gateloss}
 \end{equation}
 with a small regularizer pulling the gates toward the winner (protecting pose and
-quality). From noise there is no leakage, so the only way to raise the cosine is
+quality). \revised{We set $\lambda{=}0.02$; App.~\ref{sec:appendix_lambda}
+justifies this choice with a bracketing sweep against $\lambda\in\{0.005,0.1\}$
+under the identical training budget.} From noise there is no leakage, so the only way to raise the cosine is
 to actually route attention to the identity. We \emph{freeze the skeleton gain}
 ($\gamma_{\mathrm{skel}}{=}1$) so the learned change is confined to identity; the
 allocator transfers across resolutions because it indexes only (step, layer,

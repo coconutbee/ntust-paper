@@ -10,7 +10,11 @@ supply the full causal and quantitative data behind Chapter 5's mechanistic
 account of \emph{why} identity survives and \emph{why} reference order
 matters. A.7--A.8 are reference material---the exact angle formulas and
 identity-encoder definitions the main chapters cite by name but do not spell
-out.
+out. \revised{A.9--A.11 close three further robustness questions: whether the
+$\gamma$-gate's regularization strength $\lambda$ is justified rather than
+arbitrary (A.9), whether identity preservation is stable across the reference
+identity's race (A.10), and whether additional prompt content beyond pose
+costs identity or pose (A.11).}
 
 \section{Per-method pose distributions}
 \label{sec:appendix_thresh}
@@ -497,3 +501,173 @@ generation failure. Crucially, the comparison conditions identity on
 \emph{having achieved the pose}: a personalizer that collapses to frontal is
 never tested at profile, so we read identity only over images that actually
 rotated.
+
+\revised{
+\section{Regularization strength: choosing $\lambda$ for the learned $\gamma$-gate}
+\label{sec:appendix_lambda}
+Sec.~\ref{sec:learned} trains the $\sim$200-parameter allocator with
+$\mathcal{L}=(m-\cos)_{+}+\lambda\,\overline{(\log\gamma)^2}$
+(Eq.~\ref{eq:gateloss}, $\lambda{=}0.02$): the regularizer is an $L_2$ penalty
+in \emph{log}-space, so it is a ridge/shrinkage prior pulling every
+$(\text{step},\text{layer},\text{kind})$ gain back toward $\log\gamma{=}0$,
+i.e.\ $\gamma{=}1$, the causally-verified \dupid{} winner baseline
+(Sec.~\ref{sec:whyworks})---not an arbitrary weight but a knob that trades
+how far training is allowed to depart from that baseline against how much
+identity gain it is permitted to chase. To check $\lambda{=}0.02$ is not simply
+the first value tried, we bracket it with a $3$-point sweep
+$\lambda\in\{0.005,0.02,0.1\}$ ($5{\times}$ below and above), retraining from
+scratch under the \emph{identical} $800$-step budget, cache, and $16$-image
+held-out validation set used to report every number in this thesis, and
+re-evaluating at the final ($800$-step) checkpoint of each run.
+
+Table~\ref{tab:lambda_sweep} reports the result. \textbf{Pose is unaffected by
+$\lambda$}: yaw accuracy is identical ($75.0\%$, $12/16$) at all three values,
+exactly as the method predicts---the skeleton gain $\gamma_{\mathrm{skel}}$ is
+\emph{frozen}, not regularized, so nothing about $\lambda$ can touch pose;
+this sweep is an empirical check of that design guarantee, not merely a
+restatement of it. The only axis $\lambda$ moves is identity, and it moves
+\emph{non-monotonically}: the loosest setting ($\lambda{=}0.005$) reaches the
+\emph{lowest} raw CSIM ($0.097$) of the three, not the highest, despite being
+the least constrained---consistent with under-regularization leaving this
+small, $200$-example-trained tensor less reliably guided during optimization,
+not merely under-protected at convergence. $\lambda{=}0.02$ attains the best
+raw CSIM ($0.138$) of the sweep, matched within noise by $\lambda{=}0.1$
+($0.137$)---five-fold more regularization buys no further identity gain,
+indicating the useful range has already plateaued by $\lambda{=}0.02$.
+$\lambda{=}0.02$ is therefore the smallest value in the sweep that reaches the
+plateau, giving the model the most room to depart from the \dupid{} baseline
+while still landing in the region where additional freedom stops helping.
+
+\begin{table}[t]\centering\small
+\setlength{\tabcolsep}{6pt}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{lcccc}
+\toprule
+$\lambda$ & raw CSIM (Ada) & Yaw acc & pose-aware $\widetilde{\mathrm{CSIM}}$ ($k{=}4$) \\
+\midrule
+$0.005$ & $0.097$ & $75.0$ & $0.036$ \\
+\textbf{$0.02$ (used)} & $\mathbf{0.138}$ & $75.0$ & $\mathbf{0.051}$ \\
+$0.1$ & $0.137$ & $75.0$ & $0.050$ \\
+\bottomrule
+\end{tabular}}
+\caption[Regularization-strength sweep for the learned $\gamma$-gate]{\textbf{Regularization-strength sweep for the learned $\gamma$-gate}
+($16$-image held-out validation set, identical $800$-step training budget per
+$\lambda$; pose-aware $\widetilde{\mathrm{CSIM}}{=}\mathrm{CSIM}\cdot e^{-4P_e}$,
+$P_e{=}1{-}\mathrm{Acc_{yaw}}$, as Eq.~\ref{eq:posepenalty}). Yaw accuracy is
+identical across all three $\lambda$ (the frozen skeleton gain protects pose by
+construction); the loosest setting reaches the \emph{lowest} raw CSIM, and
+$5\times$ more regularization than $0.02$ buys no further gain---$\lambda{=}0.02$
+sits at the plateau's edge.}
+\label{tab:lambda_sweep}
+\end{table}
+}
+
+\revised{
+\section{Identity stability across the reference identity's race}
+\label{sec:appendix_race}
+The $35$ reference identities (Fig.~\ref{fig:idgallery}) were not curated for
+race balance; this section checks whether Rotate-ID's identity preservation is
+even across the race categories that are present, extended with $4$ additional
+verified reference identities (public figures Sundar Pichai, Satya Nadella,
+Indra Nooyi, Anima Anandkumar; generated and scored under the identical
+$1400$-generation pipeline configuration, kept in a separate pool so the
+main $35$-identity benchmark is untouched) to populate a category that had
+zero coverage. Race labels come from DeepFace, with a caveat worth stating
+plainly: DeepFace's own classifier mislabeled $4$ of the $5$ verified
+South-Asian public figures in this pool by race (three of the four newly added
+identities, plus Malala Yousafzai already in the original $35$)---corrected
+here to \emph{indian} based on verified public identity, not the classifier's
+output, since named individuals admit independent ground truth that anonymous
+crops do not. A fifth sourced candidate, mislabeled ``Arvind Krishna'' by a
+Wikimedia Commons category page that conflates multiple unrelated people
+sharing that name, turned out on inspection to be a different person entirely
+and was dropped rather than corrected.
+
+Table~\ref{tab:race} reports identity (raw and pose-aware AdaFace \csim{}) by
+race. The four categories with $n{\geq}5$ identities---white, asian, black, and
+the newly-populated indian---sit within a narrow band (raw \csim{}
+$0.272$--$0.340$; pose-aware $0.125$--$0.195$), with no category showing a
+systematic deficit; middle eastern ($n{=}2$) and latino hispanic ($n{=}1$, after
+the race correction above moved Malala out of it) are flagged as
+too small to support a claim either way rather than silently averaged in.
+
+\begin{table}[t]\centering\small
+\setlength{\tabcolsep}{5pt}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{lcccc}
+\toprule
+Race & $n$ identities & raw CSIM (Ada) & Yaw acc & pose-aware ($k{=}4$) \\
+\midrule
+white & 19 & 0.272 & 82.2 & 0.133 \\
+asian & 7 & 0.281 & 79.6 & 0.125 \\
+black & 5 & 0.322 & 87.5 & 0.195 \\
+indian & 5 & 0.340 & 75.5 & 0.128 \\
+\midrule
+middle eastern$^\dagger$ & 2 & 0.328 & 85.0 & 0.180 \\
+latino hispanic$^\dagger$ & 1 & 0.520 & 82.5 & 0.258 \\
+\bottomrule
+\end{tabular}}
+\caption[Identity preservation by reference race]{\textbf{Identity preservation by reference identity's race} (pose-aware
+$\widetilde{\mathrm{CSIM}}{=}\mathrm{CSIM}\cdot e^{-4P_e}$, $P_e{=}1{-}\mathrm{Acc_{yaw}}$,
+as Eq.~\ref{eq:posepenalty}; $40$ generations per identity). The four categories
+with $n{\geq}5$ identities lie within a narrow band on both raw and pose-aware
+CSIM; $^\dagger$flagged categories have too few identities ($n{<}5$) to support
+an independent claim.}
+\label{tab:race}
+\end{table}
+}
+
+\revised{
+\section{Additional prompt conditions: does richer conditioning cost identity or pose?}
+\label{sec:appendix_condition1}
+Every prompt in the main benchmark (Table~\ref{tab:prompts}) already varies
+demographic and scene attributes; this section asks a narrower question raised
+independently of that design---whether \emph{explicitly} adding a facial
+expression or a facial accessory to the prompt trades away identity, pose, or
+neither. We select $100$ (identity, prompt) pairs stratified across all $40$
+canonical prompts from the main $1400$-generation benchmark and, for each,
+generate three variants that append a clause to the \emph{exact} original
+prompt text---an expression (rotated through five variants: smiling,
+surprised, confused, calm, sad), a facial accessory (rotated through five
+variants: glasses, sunglasses, a hat, earrings, a scarf), or
+both---while reusing the identical reference image, skeleton control, seed, and
+$\gamma$-gate configuration as that pair's already-scored baseline row, so the
+$300$ new generations are a paired comparison against zero new baseline
+generation.
+
+Table~\ref{tab:condition1} reports the result. \textbf{Identity is largely
+unaffected}: an expression clause leaves raw CSIM essentially unchanged
+($0.292{\to}0.292$); the accessory conditions do show a CSIM drop ($\to\!0.23$),
+plausibly because glasses/sunglasses/a hat genuinely occlude the face region
+AdaFace reads, rather than the model losing the identity. \textbf{Pose is the
+axis that pays}: yaw accuracy falls from $80.0\%$ to $65$--$69\%$ under
+\emph{every} added condition, by a comparable margin regardless of whether the
+addition is an expression or an accessory---consistent with the
+attention-budget account of this thesis (Sec.~\ref{sec:lim-scale}): additional
+semantic content the prompt must render competes for the same finite
+conditioning capacity that otherwise goes toward realizing the requested pose.
+
+\begin{table}[t]\centering\small
+\setlength{\tabcolsep}{5pt}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{lccccc}
+\toprule
+Condition & $n$ & face det.\ & raw CSIM (Ada) & Yaw acc & pose-aware ($k{=}4$) \\
+\midrule
+baseline (no addition) & 100 & 0.90 & 0.292 & 80.0 & 0.131 \\
++\,expression & 100 & 0.94 & 0.292 & 65.0 & 0.072 \\
++\,accessory & 100 & 0.88 & 0.233 & 69.0 & 0.068 \\
++\,both & 100 & 0.92 & 0.238 & 66.0 & 0.061 \\
+\bottomrule
+\end{tabular}}
+\caption[Additional prompt conditions vs.\ identity and pose]{\textbf{Additional prompt conditions vs.\ identity and pose} ($100$
+paired identity/prompt pairs $\times$ each condition; pose-aware
+$\widetilde{\mathrm{CSIM}}{=}\mathrm{CSIM}\cdot e^{-4P_e}$, $P_e{=}1{-}\mathrm{Acc_{yaw}}$,
+as Eq.~\ref{eq:posepenalty}). Identity is close to unaffected by an expression
+clause and drops modestly under an accessory clause (plausibly genuine visual
+occlusion); pose accuracy drops by a comparable margin under \emph{any} added
+condition, identifying pose---not identity---as what additional conditioning
+competes with.}
+\label{tab:condition1}
+\end{table}
+}
