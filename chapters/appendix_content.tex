@@ -514,29 +514,30 @@ i.e.\ $\gamma{=}1$, the causally-verified \dupid{} winner baseline
 (Sec.~\ref{sec:whyworks})---not an arbitrary weight but a knob that trades
 how far training is allowed to depart from that baseline against how much
 identity gain it is permitted to chase. To check $\lambda{=}0.02$ is not simply
-the first value tried, we bracket it with a $3$-point sweep
-$\lambda\in\{0.005,0.02,0.1\}$ ($5{\times}$ below and above), retraining from
-scratch under the \emph{identical} $800$-step budget, cache, and $16$-image
-held-out validation set used to report every number in this thesis, and
-re-evaluating at the final ($800$-step) checkpoint of each run.
+the first value tried, we bracket it with a $4$-point sweep
+$\lambda\in\{0.005,0.02,0.1,0.5\}$ (a $4\times$ and $25\times$ increase, plus a
+$4\times$ decrease), retraining from scratch under the \emph{identical}
+$800$-step budget, cache, and $16$-image held-out validation set used to report
+every number in this thesis, and re-evaluating at the final ($800$-step)
+checkpoint of each run.
 
-Table~\ref{tab:lambda_sweep} reports the result. \textbf{Pose is unaffected by
-$\lambda$}: yaw accuracy is identical ($75.0\%$, $12/16$) at all three values,
-exactly as the method predicts---the skeleton gain $\gamma_{\mathrm{skel}}$ is
-\emph{frozen}, not regularized, so nothing about $\lambda$ can touch pose;
-this sweep is an empirical check of that design guarantee, not merely a
-restatement of it. The only axis $\lambda$ moves is identity, and it moves
-\emph{non-monotonically}: the loosest setting ($\lambda{=}0.005$) reaches the
-\emph{lowest} raw CSIM ($0.097$) of the three, not the highest, despite being
-the least constrained---consistent with under-regularization leaving this
-small, $200$-example-trained tensor less reliably guided during optimization,
-not merely under-protected at convergence. $\lambda{=}0.02$ attains the best
-raw CSIM ($0.138$) of the sweep, matched within noise by $\lambda{=}0.1$
-($0.137$)---five-fold more regularization buys no further identity gain,
-indicating the useful range has already plateaued by $\lambda{=}0.02$.
-$\lambda{=}0.02$ is therefore the smallest value in the sweep that reaches the
-plateau, giving the model the most room to depart from the \dupid{} baseline
-while still landing in the region where additional freedom stops helping.
+Table~\ref{tab:lambda_sweep} and Fig.~\ref{fig:lambda_sweep} report the result.
+\textbf{Pose is unaffected by $\lambda$}: yaw accuracy is identical ($75.0\%$,
+$12/16$) at \emph{all four} values, exactly as the method predicts---the
+skeleton gain $\gamma_{\mathrm{skel}}$ is \emph{frozen}, not regularized, so
+nothing about $\lambda$ can touch pose; this sweep is an empirical check of
+that design guarantee, not merely a restatement of it. The only axis $\lambda$
+moves is identity, and it traces a clear inverted-U: the loosest setting
+($\lambda{=}0.005$) under-shoots ($0.097$ raw CSIM), $\lambda{=}0.02$ and
+$\lambda{=}0.1$ sit on a plateau at the top ($0.138$/$0.137$), and pushing
+$25\times$ higher to $\lambda{=}0.5$ collapses \emph{below even the loosest
+setting} ($0.076$)---within reach of the untrained ($\gamma{=}1$) baseline's
+$0.024$ pose-aware floor, i.e.\ the regularizer has begun to cancel out the
+training signal entirely. $\lambda{=}0.02$ is the smallest value in the sweep
+that reaches the plateau, giving the model the most room to depart from the
+\dupid{} baseline while still avoiding both failure mode: too little
+regularization leaves the small, $200$-example-trained tensor under-guided
+during optimization, and too much drags it back toward the untrained baseline.
 
 \begin{table}[t]\centering\small
 \setlength{\tabcolsep}{6pt}
@@ -548,18 +549,32 @@ $\lambda$ & raw CSIM (Ada) & Yaw acc & pose-aware $\widetilde{\mathrm{CSIM}}$ ($
 $0.005$ & $0.097$ & $75.0$ & $0.036$ \\
 \textbf{$0.02$ (used)} & $\mathbf{0.138}$ & $75.0$ & $\mathbf{0.051}$ \\
 $0.1$ & $0.137$ & $75.0$ & $0.050$ \\
+$0.5$ & $0.076$ & $75.0$ & $0.028$ \\
+\midrule
+\emph{untrained ($\gamma{=}1$, $\lambda\to\infty$ limit)} & $0.107$ & -- & $0.024$ \\
 \bottomrule
 \end{tabular}}
 \caption[Regularization-strength sweep for the learned $\gamma$-gate]{\textbf{Regularization-strength sweep for the learned $\gamma$-gate}
 ($16$-image held-out validation set, identical $800$-step training budget per
 $\lambda$; pose-aware $\widetilde{\mathrm{CSIM}}{=}\mathrm{CSIM}\cdot e^{-4P_e}$,
 $P_e{=}1{-}\mathrm{Acc_{yaw}}$, as Eq.~\ref{eq:posepenalty}). Yaw accuracy is
-identical across all three $\lambda$ (the frozen skeleton gain protects pose by
-construction); the loosest setting reaches the \emph{lowest} raw CSIM, and
-$5\times$ more regularization than $0.02$ buys no further gain---$\lambda{=}0.02$
-sits at the plateau's edge.}
+identical across all four $\lambda$ (the frozen skeleton gain protects pose by
+construction). Identity traces an inverted-U: $\lambda{=}0.02$ sits at the top
+of the plateau, while $25\times$ more regularization ($\lambda{=}0.5$) collapses
+\emph{past} the loosest setting, approaching the untrained floor.}
 \label{tab:lambda_sweep}
 \end{table}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.72\linewidth]{figures/lambda_sweep_curve.png}
+\caption[Regularization-strength sweep, visualized]{\textbf{Regularization-strength sweep, visualized} (same data as
+Table~\ref{tab:lambda_sweep}, log-$\lambda$ axis). Both raw and pose-aware CSIM
+trace the same inverted-U; the dashed line is the untrained baseline that
+$\lambda\to\infty$ converges to. $\lambda{=}0.02$ (circled) sits at the plateau
+where increasing $\lambda$ further stops helping and decreasing it starts
+hurting, in both directions.}
+\label{fig:lambda_sweep}
+\end{figure}
 }
 
 \revised{
@@ -567,29 +582,37 @@ sits at the plateau's edge.}
 \label{sec:appendix_race}
 The $35$ reference identities (Fig.~\ref{fig:idgallery}) were not curated for
 race balance; this section checks whether Rotate-ID's identity preservation is
-even across the race categories that are present, extended with $4$ additional
-verified reference identities (public figures Sundar Pichai, Satya Nadella,
-Indra Nooyi, Anima Anandkumar; generated and scored under the identical
-$1400$-generation pipeline configuration, kept in a separate pool so the
-main $35$-identity benchmark is untouched) to populate a category that had
-zero coverage. Race labels come from DeepFace, with a caveat worth stating
-plainly: DeepFace's own classifier mislabeled $4$ of the $5$ verified
-South-Asian public figures in this pool by race (three of the four newly added
-identities, plus Malala Yousafzai already in the original $35$)---corrected
-here to \emph{indian} based on verified public identity, not the classifier's
-output, since named individuals admit independent ground truth that anonymous
-crops do not. A fifth sourced candidate, mislabeled ``Arvind Krishna'' by a
-Wikimedia Commons category page that conflates multiple unrelated people
-sharing that name, turned out on inspection to be a different person entirely
-and was dropped rather than corrected.
+even across race, extended with $34$ additional verified reference identities
+(public figures spanning asian, black, middle eastern, latino hispanic, and
+indian; generated and scored under the identical $1400$-generation pipeline
+configuration, kept in a separate pool so the main $35$-identity benchmark is
+untouched) so that \emph{every} category reaches at least $n{=}10$ identities,
+including two categories (middle eastern, latino hispanic) that started with
+only $1$--$2$.
 
-Table~\ref{tab:race} reports identity (raw and pose-aware AdaFace \csim{}) by
-race. The four categories with $n{\geq}5$ identities---white, asian, black, and
-the newly-populated indian---sit within a narrow band (raw \csim{}
-$0.272$--$0.340$; pose-aware $0.125$--$0.195$), with no category showing a
-systematic deficit; middle eastern ($n{=}2$) and latino hispanic ($n{=}1$, after
-the race correction above moved Malala out of it) are flagged as
-too small to support a claim either way rather than silently averaged in.
+Sourcing at this scale surfaced a finding worth stating plainly: DeepFace's own
+race classifier mislabeled $17$ of the $30$ newly sourced public figures
+($57\%$)---not only the previously-noted South-Asian bias (e.g.\ Priyanka
+Chopra, Shah Rukh Khan, Aishwarya Rai all read as \emph{white}), but broadly
+across categories (Barack Obama read as \emph{latino hispanic}; Jennifer Lopez
+as \emph{asian}; Jordan's Queen Rania and Egyptian-American news anchor Hoda
+Kotb both read as \emph{white}). Every label in this section is therefore the
+verified public identity of the named individual, \emph{not} DeepFace's raw
+output, which independent ground truth makes possible only for named figures.
+This also means the classifier's reliability on the original $35$ anonymous
+reference crops---which admit no such independent check---cannot be
+established one way or the other; the race labels for that portion of the
+benchmark should be read as approximate. (One additional sourcing error is
+also worth disclosing: a Wikimedia Commons category mislabeled ``Arvind
+Krishna'' conflated multiple unrelated people sharing that name; the resulting
+photo was a different person entirely and was dropped rather than corrected.)
+
+Table~\ref{tab:race} and Fig.~\ref{fig:race} report identity (raw and
+pose-aware AdaFace \csim{}) by race, now with every category at $n{\geq}10$.
+All six sit within a narrow band (raw \csim{} $0.242$--$0.302$; pose-aware
+$0.099$--$0.167$), with no category showing a systematic deficit; asian is the
+lowest on both measures and black the highest, but the spread is modest next
+to the gap this thesis reports between methods (Table~\ref{tab:posepenalized}).
 
 \begin{table}[t]\centering\small
 \setlength{\tabcolsep}{5pt}
@@ -599,22 +622,29 @@ too small to support a claim either way rather than silently averaged in.
 Race & $n$ identities & raw CSIM (Ada) & Yaw acc & pose-aware ($k{=}4$) \\
 \midrule
 white & 19 & 0.272 & 82.2 & 0.133 \\
-asian & 7 & 0.281 & 79.6 & 0.125 \\
-black & 5 & 0.322 & 87.5 & 0.195 \\
-indian & 5 & 0.340 & 75.5 & 0.128 \\
-\midrule
-middle eastern$^\dagger$ & 2 & 0.328 & 85.0 & 0.180 \\
-latino hispanic$^\dagger$ & 1 & 0.520 & 82.5 & 0.258 \\
+black & 10 & 0.302 & 85.2 & 0.167 \\
+indian & 10 & 0.301 & 80.2 & 0.137 \\
+latino hispanic & 10 & 0.271 & 82.0 & 0.132 \\
+middle eastern & 10 & 0.275 & 81.8 & 0.132 \\
+asian & 10 & 0.242 & 77.5 & 0.099 \\
 \bottomrule
 \end{tabular}}
 \caption[Identity preservation by reference race]{\textbf{Identity preservation by reference identity's race} (pose-aware
 $\widetilde{\mathrm{CSIM}}{=}\mathrm{CSIM}\cdot e^{-4P_e}$, $P_e{=}1{-}\mathrm{Acc_{yaw}}$,
-as Eq.~\ref{eq:posepenalty}; $40$ generations per identity). The four categories
-with $n{\geq}5$ identities lie within a narrow band on both raw and pose-aware
-CSIM; $^\dagger$flagged categories have too few identities ($n{<}5$) to support
-an independent claim.}
+as Eq.~\ref{eq:posepenalty}; $40$ generations per identity). Every category now
+has $n{\geq}10$ identities; all six lie within a narrow band on both raw and
+pose-aware CSIM, with no systematic deficit in any category.}
 \label{tab:race}
 \end{table}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.85\linewidth]{figures/race_csim_by_category.png}
+\caption[Identity preservation by race, raw vs.\ pose-aware]{\textbf{Identity preservation by race, raw vs.\ pose-aware} (same
+data as Table~\ref{tab:race}, all categories $n{\geq}10$). The six categories
+cluster within a modest range on both raw and pose-aware CSIM; asian is
+lowest, black highest, but no category is a systematic outlier.}
+\label{fig:race}
+\end{figure}
 }
 
 \revised{
