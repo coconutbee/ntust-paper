@@ -109,7 +109,11 @@ would let weak yaw control hide behind easy pitch
 yaw/pitch weighting). The principle is explicit---\emph{identity only counts
 at the pose actually requested}---so frontal collapse can no longer masquerade
 as identity preservation; we sweep $k$ across methods in
-Sec.~\ref{sec:exp_penalized}.
+Sec.~\ref{sec:exp_penalized}. \revised{The penalty term $e^{-kP_e}$ is a design
+choice rather than a measured ground truth---App.~\ref{sec:appendix_profile}
+argues for its validity by relating it to the independently-motivated PAEs
+correction, rather than by re-synthesizing each reference at the achieved
+pose.}
 
 Every method is then scored as the triple
 $(\mathcal{S}_{\mathrm{pose}},\,\widetilde{\mathrm{CSIM}},\,

@@ -503,6 +503,33 @@ never tested at profile, so we read identity only over images that actually
 rotated.
 
 \revised{
+\paragraph{Relating the pose-aware discount to PAEs.} The pose-aware identity
+$\widetilde{\mathrm{CSIM}}(k){=}\mathrm{CSIM}\cdot e^{-kP_e}$
+(Eq.~\ref{eq:posepenalty}) and PAEs attack the \emph{same} frontal-bias problem
+by two independent routes, and neither is validated against a ground-truth
+same-pose photograph---no such photograph exists for a synthesized identity, and
+we do not re-synthesize the reference at the achieved pose to manufacture one
+(a route we considered and set aside, since it would substitute one generative
+model's rendering for another rather than supply independent ground truth).
+The two corrections instead check each other. PAEs corrects the \emph{encoder}:
+it swaps in a pose-appropriate recognizer so CSIM is read fairly even when a
+hard angle \emph{was} achieved, addressing the case a method rotates correctly
+but AdaFace still under-credits it. The pose-aware discount corrects the
+\emph{score}: it penalizes CSIM whenever the requested pose was \emph{not}
+achieved, regardless of which encoder measured it, addressing the case a
+method never rotates and free-rides on AdaFace's frontal bias. These are
+different failure modes with no logical reason to agree---yet applying the
+identical discount to both encoders produces the same verdict: at $k{=}4$,
+\textbf{Rotate-ID} leads every tuning-free baseline on \emph{both} the AdaFace-
+and the PAEs-based pose-aware score (Table~\ref{tab:posepenalized}), and the
+un-discounted PAEs read-out already recovers most of the apparent profile loss
+before any discount is applied (the recovery documented above). Two
+independently-motivated corrections to two different failure modes converging
+on the same ranking is the evidence this thesis offers for the discount's
+validity, in place of a same-pose ground-truth photograph that does not exist.
+}
+
+\revised{
 \section{Regularization strength: choosing $\lambda$ for the learned $\gamma$-gate}
 \label{sec:appendix_lambda}
 Sec.~\ref{sec:learned} trains the $\sim$200-parameter allocator with
