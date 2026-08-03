@@ -39,7 +39,17 @@
 \usepackage[UTF8]{ctex}   % heading=true omitted -- see note above (English chapter numbering)
 
 \setmainfont[Mapping=tex-text]{Times New Roman}
-\setCJKmainfont[AutoFakeBold={4}]{cwTeXKai}
+% Prefer the bundled BiauKai (標楷體) for the Kai-style look.
+\setCJKmainfont[
+  Path=./,
+  Extension=.ttf,
+  AutoFakeBold={4}
+]{標楷體}
+
+% Ensure appendix/chapter labels use Traditional Chinese and never hit missing-glyph issues.
+\newCJKfontfamily\ntustAppendixLabelFont{Noto Serif CJK TC}
+\renewcommand{\appendixname}{{\ntustAppendixLabelFont 附錄}}
+
 \XeTeXlinebreaklocale "zh"
 \XeTeXlinebreakskip = 0pt plus 1pt
 

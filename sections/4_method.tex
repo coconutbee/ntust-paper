@@ -318,7 +318,7 @@ transfers across resolutions because it indexes only (step,\,layer,\,kind).
 \caption[Learned attention-budget allocator ($\gamma$-gate, Sec.~\ref{sec:learned})]{\textbf{Learned attention-budget allocator ($\gamma$-gate,
 Sec.~\ref{sec:learned}).} A small \emph{log-gain tensor}
 $\log\gamma\in\mathbb{R}^{S\times L\times K}$ ($S{=}4$ steps, $L{=}25$ layers,
-$K{\in}\{\mathrm{id},\mathrm{skel}\}$; $\sim$200 params, initialized to $0$) is
+$K{\in}\{\mathrm{id},\mathrm{pose}\}$; $\sim$200 params, initialized to $0$) is
 injected into the frozen FLUX.2-klein sampler: at each step\,$s$ and layer\,$\ell$
 it adds $\log\gamma_{s,\ell,k}$ to block $k$'s key columns \emph{before} softmax.
 The identity-key gain is \emph{learned}; the skeleton-key gain is frozen at
