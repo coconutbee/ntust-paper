@@ -51,77 +51,72 @@
 %       ntust cover 封面
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+% Cover layout ported from https://github.com/clw8998/Master-Thesis (banner
+% logo + double-rule title block + right-aligned student ID), keeping this
+% repo's own macro names (\cTitle, \myCname, \advisorCnameA/B/C, ...) so
+% frontpages/my_names.tex still drives every field.
 \begin{titlepage}
 % no page number
 % next page will be page 1
 
 % aligned to the center of the page
 \begin{center}
-% font size (relative to 12 pt):
-% \large (14pt) < \Large (18pt) < \LARGE (20pt) < \huge (24pt)< \Huge (24 pt)
-%
-
-
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1in]{frontpages/NTUSTLogo.png}
-    \label{fig:ntust_logo}
-\end{figure}
-	
 \centering
-\makebox[6cm][s]{\textbf{\Large{\univCname}}}\\  %顯示中文校名
-%\vspace{0.5cm}
-\makebox[4.4cm][s]{\textbf{\Large{\deptCname}}}\\ %顯示中文系所名
-%\vspace{0.5cm}
 
-%\hfill
-\makebox[4.4cm][s]{\textbf{\Large{\degreeCname 論文}}}\\ %顯示論文種類 (中文)
-%\makebox[8cm][s]{\textbf{\Huge{\degreeCname 論文（初稿）}}}\\ %顯示論文種類 (中文)
-{
-\linespread{0.1} \selectfont
-\null\hfill {學號：M11307322}
-\rule{16cm}{1pt}
+\vspace*{1cm}
+\begin{minipage}{0.7\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{frontpages/NTUSTEELogo.png}
+\end{minipage}
+
+\vspace{0.5cm}
+\hspace*{1cm}{\Huge\bfseries \degreeCname 學位論文}\par
+
+\vspace{0.75cm}
+
+\noindent
+\makebox[\textwidth][r]{%
+  \raisebox{0.ex}{\fontsize{14pt}{14pt}\selectfont 學號：\myStudentID}%
 }
 
-
-
-
-
+% 上細
+\rule{\textwidth}{0.4pt}\\[-16pt]
+% 下粗
+\rule{\textwidth}{4pt}\\[1cm]
 
 %
 % Set the line spacing to single for the titles (to compress the lines)
 \renewcommand{\baselinestretch}{1}   %行距 1 倍
-\vspace{2cm}
-%\large % it needs a font size changing command to be effective
-\LARGE{\cTitle}\\  % 中文題目
-%
-\vspace{1cm}
-%
-\LARGE{\eTitle}\\ %英文題目
-\vspace{3cm}
+
+\begin{minipage}{1.0\textwidth}
+\centering
+{\LARGE\bfseries \cTitle}\\  % 中文題目
+\end{minipage}
+
+\vspace{0.5cm}
+
+\begin{minipage}{1.0\textwidth}
+\centering
+{\LARGE\bfseries \eTitle}\\ %英文題目
+\end{minipage}
+
+\vspace{1.5cm}
+
 % \makebox is a text box with specified width;
 % option s: stretch
-% use \makebox to make sure
-% 「研究生：」 與「指導教授：」occupy the same width
-\hspace{4.5cm} \makebox[3cm][s]{\Large{研 究 生：}}
-\makebox[3cm][s]{\Large{\myCname}}  % 顯示作者中文名
-\hfill \makebox[1cm][s]{}\\
+% use \makebox to make sure each info line's label/value boxes line up
+\begin{minipage}{0.9\textwidth}
+\begin{center}
+\makebox[3cm][s]{\Large{研究生}}{\Large{：}}\makebox[3cm][s]{\Large{\myCname}}\par\vspace{0.5cm}
 %
-
-%\vspace{1cm}
-\hspace{4.5cm} \makebox[3cm][s]{\Large{指導教授：}}
-\makebox[3cm][s]{\Large{\advisorCnameA}}  %顯示指導教授A中文名
-\hfill \makebox[1cm][s]{}\\
+\makebox[3cm][s]{\Large{指導教授}}{\Large{：}}\makebox[3cm][s]{\Large{\advisorCnameA}}\par\vspace{0.5cm}
 %
 % 判斷是否有共同指導的教授 B
 \ifx \advisorCnameB  \itsempty
 \relax % 沒有 B 教授，所以不佔版面，不印任何空白
 \else
 % 共同指導的教授 B
-\hspace{4.5cm} \makebox[3cm][s]{}
-\makebox[3cm][s]{\Large{\advisorCnameB}}  %顯示指導教授B中文名
-\hfill \makebox[1cm][s]{}\\
+\makebox[3cm][s]{}{\Large{：}}\makebox[3cm][s]{\Large{\advisorCnameB}}\par\vspace{0.5cm}
 \fi
 %
 % 判斷是否有共同指導的教授 C
@@ -129,13 +124,13 @@
 \relax % 沒有 C 教授，所以不佔版面，不印任何空白
 \else
 % 共同指導的教授 C
-\hspace{4.5cm} \makebox[3cm][s]{}
-\makebox[3cm][s]{\Large{\advisorCnameC}}  %顯示指導教授C中文名
-\hfill \makebox[1cm][s]{}\\
+\makebox[3cm][s]{}{\Large{：}}\makebox[3cm][s]{\Large{\advisorCnameC}}\par\vspace{0.5cm}
 \fi
-%
-\vfill
-\makebox[10cm][s]{\Large{中華民國 一一五 年 六 月 十三 日}}%
+\end{center}
+\end{minipage}
+
+\vspace{1cm}
+{\LARGE 中華民國\cYear 年\cMonth 月}
 %
 \end{center}
 % Resume the line spacing to the desired setting
