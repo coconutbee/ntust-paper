@@ -158,14 +158,13 @@
 % insert the printed standard form when the thesis is ready to bind
 % 在口試完成後，再將已簽名的推薦書放入以便裝訂
 % create an entry in table of contents for 推薦書
-% 目前送出空白頁
-% Re-enabled (real 2.0.1 source ships this commented out, matching 1.7.1's
-% own note that it's "no longer necessary" per a 2018 rule change -- kept
-% active here since a thesis submission genuinely needs this placeholder/TOC
-% entry for the signed recommendation letter to be bound in later).
-% \newpage{\thispagestyle{empty}\addcontentsline{toc}{chapter}{\nameInnerCover}\mbox{}\clearpage}%
-% (Removed placeholder blank page for \nameInnerCover at user's request.)
-%\newpage
+% Signed recommendation form (scanned from the student information system),
+% bound right after the cover.
+\newpage{\thispagestyle{empty}\addcontentsline{toc}{chapter}{\nameInnerCover}%
+\begin{center}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figures/suggest.jpg}
+\end{center}
+\clearpage}%
 
 % 判斷是否要浮水印？
 \ifx\mywatermark\undefined 
@@ -295,11 +294,13 @@
 % insert the printed standard form when the thesis is ready to bind
 % 在口試完成後，再將已簽名的審定書放入以便裝訂
 % create an entry in table of contents for 審定書
-% 目前送出空白頁
-
-% Re-enabled, same reasoning as \nameInnerCover above.
-% \newpage{\thispagestyle{empty}\addcontentsline{toc}{chapter}{\nameCommitteeForm}\mbox{}\clearpage}%
-% (Removed placeholder blank page for \nameCommitteeForm at user's request.)
+% Signed qualification form (scanned from the student information system),
+% bound right after the recommendation form.
+\newpage{\thispagestyle{empty}\addcontentsline{toc}{chapter}{\nameCommitteeForm}%
+\begin{center}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figures/review_doc.png}
+\end{center}
+\clearpage}%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
