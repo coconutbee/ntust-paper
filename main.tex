@@ -58,6 +58,41 @@
 
 \input{common_env}   % template's fixed environment (margins, page style, watermark, titletoc, etc.) -- do not alter
 
+% Drop any accidental ToC entries whose title is empty (or only a \numberline{}).
+% This fixes the ".... 72" blank line in the ToC.
+\makeatletter
+% 1) Avoid *creating* empty/number-only entries
+\let\NTUST@orig@addcontentsline\addcontentsline
+\renewcommand{\addcontentsline}[3]{%
+  \begingroup
+    \let\numberline\@gobble
+    \setbox0=\hbox{#3}% measure visible title without numberline
+    \ifdim\wd0=0pt
+      \endgroup
+      % skip empty/number-only ToC entry
+    \else
+      \endgroup
+      \NTUST@orig@addcontentsline{#1}{#2}{#3}%
+    \fi
+}
+
+% 2) Filter at *print time* for any ToC line (any level), by intercepting
+%    \contentsline when the .toc is read.
+\let\NTUST@orig@contentsline\contentsline
+\renewcommand*{\contentsline}[3]{%
+  \begingroup
+    \let\numberline\@gobble
+    \setbox0=\hbox{#2}% measure visible title without numberline
+    \ifdim\wd0=0pt
+      \endgroup
+      % skip empty/number-only ToC line
+    \else
+      \endgroup
+      \NTUST@orig@contentsline{#1}{#2}{#3}%
+    \fi
+}
+\makeatother
+
 % ---- Packages the actual chapter content needs (not part of the template --
 % common_env.tex already provides titletoc, cite, geometry, subfigure,
 % multirow, graphicx, algorithmic, amsmath, amssymb, mathrsfs, listings, url,
