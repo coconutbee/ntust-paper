@@ -117,7 +117,10 @@
 % ---- Committee-response revision marking (口試委員意見回應): new/modified text since the
 % defense draft is wrapped in \revised{...}, rendered in blue so it is visually distinct from
 % the surrounding black text. Remove/redefine to black for the final clean copy.
-\newcommand{\revised}[1]{\textcolor{blue!60!black}{#1}}
+% Group-scoped \color, not \textcolor{}{} -- \textcolor's argument-grabbing
+% cannot span a \par (blank line) or a float environment, and several
+% \revised{...} call sites wrap a multi-paragraph block including a table/figure.
+\newcommand{\revised}[1]{{\color{blue!60!black}#1}}
 
 \begin{document}
 
