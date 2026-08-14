@@ -1,4 +1,9 @@
-\chapter{Conclusion}
+% Conclusion chapter without a Table of Contents entry
+% (use an unnumbered chapter, but manually step the chapter counter so
+% the heading still shows the chapter number)
+\refstepcounter{chapter}
+\chapter*{\prechaptername\space\thechapter\space\postchaptername\hspace{1em}Conclusion}
+\chaptermark{Conclusion}
 \label{sec:conclusion}
 We set out to study \emph{posture-requested} personalized text-to-image
 generation---a single reference identity, an explicit textual posture
